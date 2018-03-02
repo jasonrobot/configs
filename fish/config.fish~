@@ -1,0 +1,6 @@
+#!/usr/bin/fish
+xmodmap ~/.Xmodmap
+setxkbmap -option 'ctrl-nocaps'
+xsetroot -solid "#000000"
+#./.screenlayout/docked.sh
+set -x -g SELENIUM 'local'
