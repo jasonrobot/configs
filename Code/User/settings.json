@@ -1,0 +1,23 @@
+{
+    "workbench.colorTheme": "Solarized Light",
+    "workbench.editor.enablePreviewFromQuickOpen": false,
+    "rust.mode": "rls",
+    "editor.wordSeparators": "`~!@#$%^&*()-=+[{]}\\|;:'\",.<>/?_",
+    "rust.rustup": {
+        "toolchain": "stable-x86_64-unknown-linux-gnu",
+        "nightlyToolchain": "nightly-x86_64-unknown-linux-gnu"
+    },
+    "window.zoomLevel": 0,
+    "editor.fontFamily": "'Roboto Mono', 'Droid Sans Mono', 'monospace', monospace, 'Droid Sans Fallback'",
+    "update.channel": "none",
+    "[ruby]" : {
+        "editor.tabSize": 2
+    },
+    "rust.rls": {
+        "useRustfmt": false
+    },
+    "explorer.confirmDragAndDrop": false,
+    "editor.fontSize": 13,
+    "files.trimTrailingWhitespace": true,
+    "editor.minimap.enabled": false
+}
