@@ -3,8 +3,12 @@
 # variables
 
 set -gx LANG en_US.utf-8
-set -x VAGRANT_DEFAULT_PROVIDER virtualbox
-set SWT_GTK3 0
+set -gx VAGRANT_DEFAULT_PROVIDER virtualbox
+set -gx SWT_GTK3 0
+
+set -gx ELM_SCALE 1.5
+set -gx GDK_SCALE 2
+set -gx GDK_DPI_SCALE 2
 
 # paths
 
@@ -45,3 +49,6 @@ end
 # code
 
 setxkbmap -option "ctrl:nocaps"
+
+
+
