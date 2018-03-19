@@ -38,15 +38,24 @@
   :config
   (setq clojure-indent-style :always-indent))
 
+(use-package company
+  :config
+  (setq company-idle-delay nil)
+  :bind (("M-SPC" . company-complete)))
+
 ;;; Modes
 
 (global-linum-mode 1)
 (global-hl-line-mode 1)
 (tool-bar-mode -1)
+(global-subword-mode 1)
+(column-number-mode 1)
 
 ;;; Mode Hooks
 
 (add-hook 'prog-mode-hook 'highlight-indentation-mode)
+(add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
+(add-to-list 'default-frame-alist '(font . "Ubuntu Mono 8"))
 
 ;;; Keybindings (and some functions)
 
@@ -61,6 +70,16 @@
     (if (= start (point))
         (beginning-of-line))))
 (global-set-key (kbd "C-a") 'beginning-of-line-or-indentation)
+
+
+(defun insert-line-before-and-indent ()
+  "Insert a new line before the current line, keeping both at the same level of indentation."
+  (interactive)
+  (beginning-of-line)
+  (newline)
+  (forward-line -1)
+  (indent-for-tab-command))
+(global-set-key (kbd "C-o") 'insert-line-before-and-indent)
 
 (global-set-key (kbd "M-;") 'comment-line)
 
@@ -79,8 +98,9 @@
 
 ;;; Misc settings
 
+(setq mouse-wheel-progressive-speed nil)
 (setq inhibit-startup-screen t)
-(set-frame-font "Roboto Mono 10")
+(set-default-font "Ubuntu Mono 8")
 
 ;;; custom-set-variables - Dont edit below here!
 
@@ -89,13 +109,16 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(column-number-mode t)
  '(custom-enabled-themes (quote (solarized-light)))
  '(custom-safe-themes
    (quote
     ("d677ef584c6dfc0697901a44b885cc18e206f05114c8a3b7fde674fce6180879" default)))
+ '(global-company-mode t)
+ '(global-subword-mode t)
  '(package-selected-packages
    (quote
-    (dockerfile-mode highlight-indentation flycheck-rust lsp-rust rust-mode slime slime-company markdown-preview-mode markdown-mode yaml-mode js2-mode flycheck-clojure flycheck-gometalinter flycheck-haskell flycheck-kotlin helm-clojuredocs expand-region solarized-theme ac-cider cider cider-decompile cider-eval-sexp-fu helm-cider helm-cider-history ggtags centered-cursor-mode use-package lua-mode helm-ls-svn helm-ls-hg helm-ls-git better-defaults)))
+    (racket-mode web-beautify better-defaults centered-cursor-mode cider dockerfile-mode expand-region ggtags haskell-mode helm helm-ls-git helm-ls-hg highlight-indentation js2-mode lsp-mode lsp-rust markdown-mode company slime yaml-mode use-package solarized-theme slime-company rust-mode lua-mode flycheck)))
  '(tab-width 4))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
