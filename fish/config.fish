@@ -10,13 +10,18 @@ set -gx ELM_SCALE 1.5
 set -gx GDK_SCALE 2
 set -gx GDK_DPI_SCALE 2
 
+set -gx EDITOR "emacsclient -t"
+set -gx VISUAL "emacsclient -t"
+
 # paths
 
-set -x LUA_PATH '/home/jason/.luarocks/share/lua/5.3/?.lua;/home/jason/.luarocks/share/lua/5.3/?/init.lua;/usr/share/lua/5.3/?.lua;/usr/share/lua/5.3/?/init.lua;/usr/lib/lua/5.3/?.lua;/usr/lib/lua/5.3/?/init.lua;./?.lua;./?/init.lua'
-set -x LUA_CPATH '/home/jason/.luarocks/lib/lua/5.3/?.so;/usr/lib/lua/5.3/?.so;/usr/lib/lua/5.3/loadall.so;./?.so'
-set -x GOPATH '/home/jason/go'
-set -x PATH $PATH /home/jason/.gem/ruby/2.5.0/bin
-set -x PATH $PATH /home/jason/.cargo/bin
+set -x LUA_PATH '/home/jhowell/.luarocks/share/lua/5.3/?.lua;/home/jhowell/.luarocks/share/lua/5.3/?/init.lua;/usr/share/lua/5.3/?.lua;/usr/share/lua/5.3/?/init.lua;/usr/lib/lua/5.3/?.lua;/usr/lib/lua/5.3/?/init.lua;./?.lua;./?/init.lua'
+set -x LUA_CPATH '/home/jhowell/.luarocks/lib/lua/5.3/?.so;/usr/lib/lua/5.3/?.so;/usr/lib/lua/5.3/loadall.so;./?.so'
+set -x GOPATH '/home/jhowell/go'
+
+# set -x PATH $PATH /home/jhowell/.gem/ruby/2.5.0/bin
+
+set -x PATH $PATH /home/jhowell/.cargo/bin
 
 # aliases and functions
 

@@ -224,6 +224,11 @@ exec setxkbmap -option ctrl:nocaps
 exec udiskie --tray
 exec nm-applet
 
+exec tp off
+exec xinput set-prop "PS/2 Generic Mouse" "Device Accel Constant Deceleration" 0.3
+exec xinput set-prop "PS/2 Generic Mouse" "Evdev Wheel Emulation" 1
+exec xinput set-prop "PS/2 Generic Mouse" "Evdev Wheel Emulation Button" 2
+
 #################################
 # keybindings to launch things! #
 #################################
@@ -258,3 +263,5 @@ bindsym $mod+q exec --no-startup-id $Locker
 
 #hide edge borders when there is only 1 window visible
 #hide_edge_borders smart
+
+# adding a comment

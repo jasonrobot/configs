@@ -3,7 +3,12 @@
 
 ;;; Code:
 
-;;; Packages
+;; do this, since I usually run fish
+(setq shell-file-name "/bin/bash")
+
+;;;;;;;;;;;;;;
+;; Packages ;;
+;;;;;;;;;;;;;;
 
 (require 'package)
 
@@ -13,8 +18,6 @@
 (package-initialize)
 
 (use-package better-defaults)
-
-(setq shell-file-name "/bin/bash")
 
 (use-package helm
   :bind (("M-x" . helm-M-x)
@@ -27,12 +30,18 @@
 (use-package flycheck
   :ensure t
   :init (global-flycheck-mode))
+
 ;; (use-package lsp-mode)
+;; (with-eval-after-load 'lsp-mode
+;;   (setq lsp-rust-rls-command '("rustup" "run" "nightly" "rls"))
+;;   (require 'lsp-rust))
+
+;; (use-package lsp-rust)
+
 ;; (use-package lsp-go)
 ;; (use-package lsp-haskell)
 ;; (use-package lsp-java)
 ;; (use-package lsp-python)
-;; (use-package lsp-rust)
 
 (use-package cider
   :config
@@ -43,7 +52,17 @@
   (setq company-idle-delay nil)
   :bind (("M-SPC" . company-complete)))
 
-;;; Modes
+(use-package js2-mode
+  :ensure t
+  :mode "\\.js\\'")
+
+(use-package highlight-indentation
+  :ensure t
+  :hook prog-mode)
+
+;;;;;;;;;;;
+;; Modes ;;
+;;;;;;;;;;;
 
 (global-linum-mode 1)
 (global-hl-line-mode 1)
@@ -51,13 +70,13 @@
 (global-subword-mode 1)
 (column-number-mode 1)
 
-;;; Mode Hooks
+;;;;;;;;;;;;;;;;
+;; Mode Hooks ;;
+;;;;;;;;;;;;;;;;
 
-(add-hook 'prog-mode-hook 'highlight-indentation-mode)
-(add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
-(add-to-list 'default-frame-alist '(font . "Ubuntu Mono 8"))
-
-;;; Keybindings (and some functions)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Keybindings (and some functions) ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (windmove-default-keybindings)
 
@@ -70,7 +89,6 @@
     (if (= start (point))
         (beginning-of-line))))
 (global-set-key (kbd "C-a") 'beginning-of-line-or-indentation)
-
 
 (defun insert-line-before-and-indent ()
   "Insert a new line before the current line, keeping both at the same level of indentation."
@@ -95,14 +113,17 @@
     (interactive)
     (scroll-up-command -16)))
 
-
-;;; Misc settings
+;;;;;;;;;;;;;;;;;;;
+;; Misc settings ;;
+;;;;;;;;;;;;;;;;;;;
 
 (setq mouse-wheel-progressive-speed nil)
 (setq inhibit-startup-screen t)
-(set-default-font "Ubuntu Mono 8")
+(add-to-list 'default-frame-alist '(font . "Ubuntu Mono 8"))
 
-;;; custom-set-variables - Dont edit below here!
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; custom-set-variables - Dont edit below here! ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -118,7 +139,7 @@
  '(global-subword-mode t)
  '(package-selected-packages
    (quote
-    (racket-mode web-beautify better-defaults centered-cursor-mode cider dockerfile-mode expand-region ggtags haskell-mode helm helm-ls-git helm-ls-hg highlight-indentation js2-mode lsp-mode lsp-rust markdown-mode company slime yaml-mode use-package solarized-theme slime-company rust-mode lua-mode flycheck)))
+    (fish-completion fish-mode company-lsp lsp-go racket-mode web-beautify better-defaults centered-cursor-mode cider dockerfile-mode expand-region ggtags haskell-mode helm helm-ls-git helm-ls-hg highlight-indentation js2-mode lsp-mode lsp-rust markdown-mode company slime yaml-mode use-package solarized-theme slime-company rust-mode lua-mode flycheck)))
  '(tab-width 4))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
