@@ -17,6 +17,9 @@
 
 (package-initialize)
 
+(unless (package-installed-p 'use-package)
+  (package-install 'use-package))
+
 (use-package better-defaults
   :ensure t)
 
@@ -89,27 +92,29 @@
   (add-hook 'before-save-hook 'tide-format-before-save)
   (add-hook 'typescript-mode-hook #'setup-tide-mode))
 
+(use-package nlinum
+  :config (global-nlinum-mode))
+
+(use-package slime
+  :config
+  (setq inferior-lisp-program "sbcl"))
+
 ;;;;;;;;;;;
 ;; Modes ;;
 ;;;;;;;;;;;
+;; Any external packages should be in the previous section.
+;; This is just for built-in modes.
 
-(global-linum-mode 1)
 (global-hl-line-mode 1)
 (tool-bar-mode -1)
 (global-subword-mode 1)
 (column-number-mode 1)
 
-;;;;;;;;;;;;;;;;
-;; Mode Hooks ;;
-;;;;;;;;;;;;;;;;
-
 (add-hook 'prog-mode-hook 'highlight-indentation-mode)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Keybindings (and some functions) ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(windmove-default-keybindings)
+;;;;;;;;;;;;;;;
+;; Functions ;;
+;;;;;;;;;;;;;;;
 
 (defun beginning-of-line-or-indentation ()
   "Move to beginning of line, or indentation."
@@ -119,7 +124,6 @@
     ;; now if point is the same as when we started, we're already at indent start
     (if (= start (point))
         (beginning-of-line))))
-(global-set-key (kbd "C-a") 'beginning-of-line-or-indentation)
 
 (defun insert-line-before-and-indent ()
   "Insert a new line before the current line, keeping both at the same level of indentation."
@@ -128,21 +132,6 @@
   (newline)
   (forward-line -1)
   (indent-for-tab-command))
-(global-set-key (kbd "C-o") 'insert-line-before-and-indent)
-
-(global-set-key (kbd "M-;") 'comment-line)
-
-(global-set-key
- (kbd "C-v")
- '(lambda ()
-    (interactive)
-    (scroll-up-command 16)))
-
-(global-set-key
- (kbd "M-v")
- '(lambda ()
-    (interactive)
-    (scroll-up-command -16)))
 
 (defun copy-file-name ()
   "Copy the current file's name to the clipboard."
@@ -156,6 +145,31 @@
         (kill-region begin (point))
         (message filename)))))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Keybindings (and some functions) ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(windmove-default-keybindings)
+
+(global-set-key (kbd "C-a") 'beginning-of-line-or-indentation)
+
+(global-set-key (kbd "C-o") 'insert-line-before-and-indent)
+
+(global-set-key (kbd "M-;") 'comment-line)
+
+
+(global-set-key
+ (kbd "C-v")
+ '(lambda ()
+    (interactive)
+    (scroll-up-command 16)))
+
+(global-set-key
+ (kbd "M-v")
+ '(lambda ()
+    (interactive)
+    (scroll-up-command -16)))
+
 ;;;;;;;;;;;;;;;;;;;
 ;; Misc settings ;;
 ;;;;;;;;;;;;;;;;;;;
@@ -167,25 +181,7 @@
 (setq custom-file "~/.emacs.d/custom.el")
 (load custom-file)
 ;; (add-to-list 'default-frame-alist '(font . "Noto Sans Mono 8"))
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; custom values worth noting ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; for use with solarized-light theme
+(provide 'init)
+;;; init.el ends here
 
-;; (custom-set-faces
-;;  ;; custom-set-faces was added by Custom.
-;;  ;; If you edit it by hand, you could mess it up, so be careful.
-;;  ;; Your init file should contain only one such instance.
-;;  ;; If there is more than one, they won't work right.
-;;  '(helm-ff-dotted-directory ((t (:background "gainsboro" :foreground "black"))))
-;;  '(helm-ls-git-added-copied-face ((t (:foreground "forest green"))))
-;;  '(helm-ls-git-added-modified-face ((t (:foreground "forest green"))))
-;;  '(helm-ls-git-deleted-and-staged-face ((t (:foreground "brown"))))
-;;  '(helm-ls-git-deleted-not-staged-face ((t (:foreground "brown"))))
-;;  '(helm-ls-git-modified-and-staged-face ((t (:foreground "deep sky blue"))))
-;;  '(helm-ls-git-modified-not-staged-face ((t (:foreground "deep sky blue"))))
-;;  '(helm-ls-git-renamed-modified-face ((t (:foreground "dark orange"))))
-;;  '(helm-ls-git-untracked-face ((t (:foreground "firebrick3"))))
-;;  '(helm-selection ((t (:background "LightYellow3" :distant-foreground "black"))))
-;;  '(hl-line ((t (:background "AntiqueWhite2")))))
