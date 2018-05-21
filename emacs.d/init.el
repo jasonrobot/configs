@@ -38,6 +38,9 @@
   :ensure t
   :init (global-flycheck-mode))
 
+(use-package anzu
+  :config (global-anzu-mode))
+
 (use-package cider
   :config
   (setq clojure-indent-style :always-indent))
@@ -136,14 +139,10 @@
 (defun copy-file-name ()
   "Copy the current file's name to the clipboard."
   (interactive)
-  (let ((begin (point))
-        (filename (buffer-file-name)))
+  (let ((filename (buffer-file-name)))
     (if (not filename)
         (message "No file name for current buffer")
-      (progn
-        (insert filename)
-        (kill-region begin (point))
-        (message filename)))))
+      (kill-new filename))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Keybindings (and some functions) ;;
