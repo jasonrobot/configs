@@ -23,6 +23,8 @@
 (use-package better-defaults
   :ensure t)
 
+(use-package diminish)
+
 (use-package helm
   :ensure t
   :bind (("M-x" . helm-M-x)
@@ -39,6 +41,7 @@
   :init (global-flycheck-mode))
 
 (use-package anzu
+  :diminish anzu-mode
   :config (global-anzu-mode))
 
 (use-package cider
@@ -94,9 +97,6 @@
   (setq company-tooltip-align-annotations t)
   (add-hook 'before-save-hook 'tide-format-before-save)
   (add-hook 'typescript-mode-hook #'setup-tide-mode))
-
-(use-package nlinum
-  :config (global-nlinum-mode))
 
 (use-package slime
   :config
@@ -173,13 +173,15 @@
 ;; Misc settings ;;
 ;;;;;;;;;;;;;;;;;;;
 
+;; (setq display-line-numbers 1)
+
 (setq mouse-wheel-progressive-speed nil)
 (setq inhibit-startup-screen t)
 (add-to-list 'default-frame-alist '(font . "Roboto Mono 9"))
+;; (add-to-list 'default-frame-alist '(font . "Noto Sans Mono 8"))
 
 (setq custom-file "~/.emacs.d/custom.el")
 (load custom-file)
-;; (add-to-list 'default-frame-alist '(font . "Noto Sans Mono 8"))
 
 (provide 'init)
 ;;; init.el ends here
