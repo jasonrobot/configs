@@ -31,7 +31,6 @@
          ("C-x C-f" . helm-find-files)
          ("C-x b" . helm-buffers-list)
          ("M-y" . helm-show-kill-ring)))
-         ;; ("C-x g" . helm-browse-project)))
 
 (use-package helm-ls-git
   :ensure t)
@@ -77,8 +76,8 @@
 ;;   (setq elpy-rpc-python-command "python3")
 ;;   :init (elpy-enable))
 
-;; (use-package web-mode
-;;   :mode "\\.ejs\\'")
+(use-package web-mode
+  :mode "\\.ejs\\'")
 
 ;; (use-package typescript-mode
 ;;   :mode "\\.tsx\\'")
@@ -105,7 +104,7 @@
 
 (use-package flymake
   :bind (("M-n" . flymake-goto-next-error)
-         ("M- p" . flymake-goto-prev-error)))
+         ("M-p" . flymake-goto-prev-error)))
 
 ;;;;;;;;;;;
 ;; Modes ;;
