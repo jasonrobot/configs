@@ -32,33 +32,34 @@
          ("C-x b" . helm-buffers-list)
          ("M-y" . helm-show-kill-ring)))
 
-(use-package helm-ls-git
-  :ensure t)
-
-;; (use-package flycheck
-;;   :ensure t
-;;   :init (global-flycheck-mode))
+(use-package flycheck
+  :ensure t
+  :init (global-flycheck-mode))
 
 (use-package anzu
   :diminish anzu-mode
   :config (global-anzu-mode))
 
-(use-package cider
-  :config
-  (setq clojure-indent-style :always-indent))
+;; (use-package cider
+;;   :config
+;;   (setq clojure-indent-style :always-indent))
 
 (use-package company
   :ensure t
   :config
   (setq company-idle-delay nil)
   :bind (("M-SPC" . company-complete)))
+
 (use-package helm-company
   :bind (("M-S-SPC" . helm-company)))
 
-(use-package projectile)
+(use-package projectile
+  :config
+  (unbind-key "C-c p l" projectile-mode-map)
+  (unbind-key "C-c p f" projectile-mode-map))
+  
 (use-package helm-projectile
-  :bind (("C-c p s" . helm-projectile-grep)
-         ("C-c p f" . helm-projectile-find-file)))
+  :bind (("C-c p s" . helm-projectile-rg)))
 
 (use-package js2-mode
   :ensure t
@@ -102,9 +103,14 @@
   :config
   (setq inferior-lisp-program "sbcl"))
 
-(use-package flymake
-  :bind (("M-n" . flymake-goto-next-error)
-         ("M-p" . flymake-goto-prev-error)))
+;; (use-package flymake
+;;   :bind (("M-n" . flymake-goto-next-error)
+;;          ("M-p" . flymake-goto-prev-error)))
+
+;; keep this package after projectile, so these key bindings are last
+(use-package helm-ls-git
+  :ensure t
+  :bind (("C-c p f" . helm-ls-git-ls)))
 
 ;;;;;;;;;;;
 ;; Modes ;;
