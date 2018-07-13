@@ -18,12 +18,14 @@
 (package-initialize)
 
 (unless (package-installed-p 'use-package)
+  (package-refresh-contents)
   (package-install 'use-package))
 
 (use-package better-defaults
   :ensure t)
 
-(use-package diminish)
+(use-package diminish
+  :ensure t)
 
 (use-package helm
   :ensure t
@@ -37,6 +39,7 @@
   :init (global-flycheck-mode))
 
 (use-package anzu
+  :ensure t
   :diminish anzu-mode
   :config (global-anzu-mode))
 
@@ -46,6 +49,7 @@
 
 (use-package company
   :ensure t
+  :diminish (company-mode . "©")
   :config
   (setq company-idle-delay nil)
   :bind (("M-SPC" . company-complete)))
@@ -59,11 +63,12 @@
   (unbind-key "C-c p f" projectile-mode-map))
   
 (use-package helm-projectile
-  :bind (("C-c p s" . helm-projectile-rg)))
+  :bind (("C-c p s" . helm-projectile-ack)))
 
 (use-package js2-mode
   :ensure t
-  :mode "\\.js\\'"
+  :mode (("\\.js\\'" . js2-mode)
+         ("\\.jsx\\'" . js2-jsx-mode))
   :bind (("C-." . js2-next-error))
   :config
   (setq js2-global-externs
@@ -78,10 +83,13 @@
 ;;   :init (elpy-enable))
 
 (use-package web-mode
-  :mode "\\.ejs\\'")
+  :mode (("\\.ejs\\'" . web-mode)
+         ("\\.ecr\\'" . web-mode)))
 
-;; (use-package typescript-mode
-;;   :mode "\\.tsx\\'")
+(use-package typescript-mode
+  :mode
+  "\\.tsx\\'"
+  "\\.jsx\\'")
 
 ;; (use-package tide
 ;;   :config
@@ -111,6 +119,9 @@
 (use-package helm-ls-git
   :ensure t
   :bind (("C-c p f" . helm-ls-git-ls)))
+
+(use-package highlight-indentation
+  :diminish highlight-indentation-mode)
 
 ;;;;;;;;;;;
 ;; Modes ;;
@@ -185,11 +196,14 @@
 ;; Misc settings ;;
 ;;;;;;;;;;;;;;;;;;;
 
-;; (setq display-line-numbers 1)
+(put 'test 'lisp-indent-function 1)
+
+(setq tramp-default-method "ssh")
+
 
 (setq mouse-wheel-progressive-speed nil)
 (setq inhibit-startup-screen t)
-(add-to-list 'default-frame-alist '(font . "Roboto Mono 9"))
+(add-to-list 'default-frame-alist '(font . "Roboto Mono 8"))
 ;; (add-to-list 'default-frame-alist '(font . "Noto Sans Mono 8"))
 
 (setq custom-file "~/.emacs.d/custom.el")
