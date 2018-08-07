@@ -194,7 +194,7 @@
 
 (setq mouse-wheel-progressive-speed nil)
 (setq inhibit-startup-screen t)
-(add-to-list 'default-frame-alist '(font . "Roboto Mono 9"))
+(add-to-list 'default-frame-alist '(font . "Roboto Mono 8"))
 ;; (add-to-list 'default-frame-alist '(font . "Noto Sans Mono 8"))
 
 (setq custom-file "~/.emacs.d/custom.el")
