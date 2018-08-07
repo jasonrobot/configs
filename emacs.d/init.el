@@ -57,7 +57,7 @@
   :config
   (unbind-key "C-c p l" projectile-mode-map)
   (unbind-key "C-c p f" projectile-mode-map))
-  
+
 (use-package helm-projectile
   :bind (("C-c p s" . helm-projectile-rg)))
 
@@ -128,6 +128,9 @@
 
 (add-hook 'emacs-lisp-mode-hook 'flymake-mode)
 
+(add-hook 'before-save-hook
+          'delete-trailing-whitespace)
+
 ;;;;;;;;;;;;;;;
 ;; Functions ;;
 ;;;;;;;;;;;;;;;
@@ -169,6 +172,8 @@
 
 (global-set-key (kbd "M-;") 'comment-line)
 
+(global-set-key (kbd "C-x g") 'magit-status)
+
 (global-set-key
  (kbd "C-v")
  '(lambda ()
@@ -197,4 +202,3 @@
 
 (provide 'init)
 ;;; init.el ends here
-
