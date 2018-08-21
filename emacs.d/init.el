@@ -112,25 +112,6 @@
   :ensure t
   :bind (("C-c p f" . helm-ls-git-ls)))
 
-;;;;;;;;;;;
-;; Modes ;;
-;;;;;;;;;;;
-;; Any external packages should be in the previous section.
-;; This is just for built-in modes.
-
-(global-hl-line-mode 1)
-(tool-bar-mode -1)
-(global-subword-mode 1)
-(column-number-mode 1)
-
-(add-hook 'prog-mode-hook 'highlight-indentation-mode)
-(add-hook 'prog-mode-hook 'auto-save-mode)
-
-(add-hook 'emacs-lisp-mode-hook 'flymake-mode)
-
-(add-hook 'before-save-hook
-          'delete-trailing-whitespace)
-
 ;;;;;;;;;;;;;;;
 ;; Functions ;;
 ;;;;;;;;;;;;;;;
@@ -159,6 +140,40 @@
     (if (not filename)
         (message "No file name for current buffer")
       (kill-new filename))))
+
+(defun insert-branch-name ()
+  "When making a commit in magit, insert the branch's name as the first word of the commit."
+  (interactive)
+  (let ((initial-pos (point))
+        (begin-pos 150))
+    (goto-char begin-pos)
+    (move-end-of-line 1)
+    (kill-ring-save begin-pos (point))
+    (goto-char initial-pos)
+    (yank)
+    (insert " ")))
+
+;;;;;;;;;;;
+;; Modes ;;
+;;;;;;;;;;;
+;; Any external packages should be in the previous section.
+;; This is just for built-in modes.
+
+(global-hl-line-mode 1)
+(tool-bar-mode -1)
+(global-subword-mode 1)
+(column-number-mode 1)
+
+(add-hook 'prog-mode-hook 'highlight-indentation-mode)
+(add-hook 'prog-mode-hook 'auto-save-mode)
+
+(add-hook 'emacs-lisp-mode-hook 'flymake-mode)
+
+(add-hook 'before-save-hook
+          'delete-trailing-whitespace)
+
+(add-hook 'git-commit-setup-hook
+          'insert-branch-name)
 
 ;;;;;;;;;;;;;;;;;
 ;; Keybindings ;;
@@ -194,7 +209,7 @@
 
 (setq mouse-wheel-progressive-speed nil)
 (setq inhibit-startup-screen t)
-(add-to-list 'default-frame-alist '(font . "Roboto Mono 8"))
+(add-to-list 'default-frame-alist '(font . "Roboto Mono 9"))
 ;; (add-to-list 'default-frame-alist '(font . "Noto Sans Mono 8"))
 
 (setq custom-file "~/.emacs.d/custom.el")
@@ -202,3 +217,4 @@
 
 (provide 'init)
 ;;; init.el ends here
+
