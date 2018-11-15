@@ -144,14 +144,25 @@
 (defun insert-branch-name ()
   "When making a commit in magit, insert the branch's name as the first word of the commit."
   (interactive)
-  (let ((initial-pos (point))
-        (begin-pos 150))
-    (goto-char begin-pos)
-    (move-end-of-line 1)
-    (kill-ring-save begin-pos (point))
-    (goto-char initial-pos)
-    (yank)
+  (unless (string= (thing-at-point 'word) "Merge")
+    (save-excursion
+      (forward-line 4)
+      (let ((branch-line (thing-at-point 'line))
+            (branch-name-regexp "On branch \\(\\w*/\\)?\\(\\w+-?[0-9]*\\)"))
+        (string-match branch-name-regexp branch-line)
+        (let ((ticket-name (match-string 2 branch-line)))
+          (when ticket-name
+            (goto-char 0)
+            (insert ticket-name)))))
+    (end-of-line)
     (insert " ")))
+
+;; A macro/function to find the next function definition in a JS file.
+(fset 'js-next-function
+   [?\C-s return ?: ?  ?? ?f ?u ?n ?c ?t ?i ?o ?n ?  ?? ?\( return])
+
+(fset 'js-prev-function
+   [?\C-r return ?: ?  ?? ?f ?u ?n ?c ?t ?i ?o ?n ?  ?? ?\( return])
 
 ;;;;;;;;;;;
 ;; Modes ;;
@@ -200,6 +211,11 @@
  '(lambda ()
     (interactive)
     (scroll-up-command -16)))
+
+(eval-after-load 'js2-mode
+  '(progn
+     (define-key js-mode-map (kbd "C-c f n") 'js-next-function)
+     (define-key js-mode-map (kbd "C-c f p") 'js-prev-function)))
 
 ;;;;;;;;;;;;;;;;;;;
 ;; Misc settings ;;
