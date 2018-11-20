@@ -176,7 +176,7 @@
 (column-number-mode 1)
 
 (add-hook 'prog-mode-hook 'highlight-indentation-mode)
-(add-hook 'prog-mode-hook 'auto-save-mode)
+;; (add-hook 'prog-mode-hook 'auto-save-mode)
 
 (add-hook 'emacs-lisp-mode-hook 'flymake-mode)
 
@@ -185,6 +185,14 @@
 
 (add-hook 'git-commit-setup-hook
           'insert-branch-name)
+
+(add-hook 'git-commit-setup-hook
+          '(lambda ()
+             (display-line-numbers-mode -1)))
+
+(add-hook 'magit-mode-hook
+          '(lambda ()
+             (display-line-numbers-mode -1)))
 
 ;;;;;;;;;;;;;;;;;
 ;; Keybindings ;;
