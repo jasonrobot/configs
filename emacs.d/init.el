@@ -34,7 +34,13 @@
 
 (use-package flycheck
   :ensure t
-  :init (global-flycheck-mode))
+  :init
+  (global-flycheck-mode)
+  :config
+  (setq-default flycheck-disabled-checkers
+                (append flycheck-disabled-checkers
+                        '(javascript-jshint)))
+  (flycheck-add-mode 'javascript-eslint 'js2-mode))
 
 (use-package anzu
   :diminish anzu-mode
@@ -67,7 +73,9 @@
   :bind (("C-." . js2-next-error))
   :config
   (setq js2-global-externs
-        '("ontraport" "describe" "it" "beforeEach" "afterEach" "beforeAll" "afterAll" "expect" "jasmine"
+        '("ontraport"
+          "setTimeout" "setInterval"
+          "describe" "it" "beforeEach" "afterEach" "beforeAll" "afterAll" "expect" "jasmine"
           "test_runner" "steal" "$" "$l" "_")))
 
 ;; elpy and tide are disabled, try to replace them with eglot or lsp-mode! Except for JS2. for now.
@@ -77,8 +85,15 @@
 ;;   (setq elpy-rpc-python-command "python3")
 ;;   :init (elpy-enable))
 
+(use-package php-mode
+  :mode "\\.php\\'"
+  :config
+  (add-hook 'php-mode-hook (lambda () (flycheck-mode -1))))
+
 (use-package web-mode
-  :mode "\\.ejs\\'")
+  :mode "\\.ejs\\'"
+  :config
+  (add-hook 'web-mode-hook 'emmet-mode))
 
 ;; (use-package typescript-mode
 ;;   :mode "\\.tsx\\'")
@@ -157,6 +172,22 @@
     (end-of-line)
     (insert " ")))
 
+;; (defun position-cursor-in-commit-buffer ()
+;;   "Move the cursor to the end of any text in the first line of the commit buffer."
+;;   (interactive)
+;;   (move-end-of-line nil))
+
+;; Add a newline as line 2, then move to end of line 1 (assuming starting at pos 0)
+;; (fset 'fix-commit-editmsg
+;;       [?\C-e return ?\C-b ? ])
+
+(defun fix-commit-editmsg ()
+  "Add an empty line as line 2, move cursor in to position for typing."
+  (interactive)
+  (move-end-of-line nil)
+  (newline)
+  (move-end-of-line 0))
+
 ;; A macro/function to find the next function definition in a JS file.
 (fset 'js-next-function
    [?\C-s return ?: ?  ?? ?f ?u ?n ?c ?t ?i ?o ?n ?  ?? ?\( return])
@@ -184,15 +215,17 @@
           'delete-trailing-whitespace)
 
 (add-hook 'git-commit-setup-hook
-          'insert-branch-name)
+          'fix-commit-editmsg)
+;;           'insert-branch-name)
 
-(add-hook 'git-commit-setup-hook
-          '(lambda ()
-             (display-line-numbers-mode -1)))
+(let ((disable-line-numbers
+       '(lambda ()
+          (display-line-numbers-mode -1))))
+  (add-hook 'git-commit-setup-hook disable-line-numbers)
+  (add-hook 'magit-mode-hook disable-line-numbers)
+  (add-hook 'term-mode-hook disable-line-numbers))
 
-(add-hook 'magit-mode-hook
-          '(lambda ()
-             (display-line-numbers-mode -1)))
+
 
 ;;;;;;;;;;;;;;;;;
 ;; Keybindings ;;
