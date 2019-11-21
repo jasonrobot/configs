@@ -262,6 +262,22 @@
 
 
 
+;; (defun position-cursor-in-commit-buffer ()
+;;   "Move the cursor to the end of any text in the first line of the commit buffer."
+;;   (interactive)
+;;   (move-end-of-line nil))
+
+;; Add a newline as line 2, then move to end of line 1 (assuming starting at pos 0)
+;; (fset 'fix-commit-editmsg
+;;       [?\C-e return ?\C-b ? ])
+
+(defun fix-commit-editmsg ()
+  "Add an empty line as line 2, move cursor in to position for typing."
+  (interactive)
+  (move-end-of-line nil)
+  (newline)
+  (move-end-of-line 0))
+
 ;; A macro/function to find the next function definition in a JS file.
 (fset 'js-next-function
       [?\C-s return ?: ?  ?? ?f ?u ?n ?c ?t ?i ?o ?n ?  ?? ?\( return])
