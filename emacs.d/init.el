@@ -1,6 +1,9 @@
 ;;; package --- init.el
 ;;; Commentary:
 
+;; TODO:
+;; set truncate lines and word wrap in org mode
+
 ;;; Code:
 
 ;; do this, since I usually run fish
@@ -12,8 +15,14 @@
 
 (require 'package)
 
-(add-to-list 'package-archives
-             '("mepla" . "http://melpa.milkbox.net/packages/") t)
+;; (add-to-list 'package-archives
+;;              '("mepla" . "http://melpa.milkbox.net/packages/")
+;;              t)
+
+;;temp fix till elpa stops being weird
+(setq package-archives
+      '(("gnu" . "http://elpa.gnu.org/packages/")
+        ("mepla" . "http://melpa.milkbox.net/packages/")))
 
 (package-initialize)
 
@@ -65,6 +74,23 @@
 ;;   :config
 ;;   (setq clojure-indent-style :always-indent))
 
+(use-package cider)
+
+(use-package clojure-mode
+  :config (define-clojure-indent ; this is for routes in compojure
+            (defroutes 'defun)
+            (GET 2)
+            (POST 2)
+            (PUT 2)
+            (DELETE 2)
+            (HEAD 2)
+            (ANY 2)
+            (OPTIONS 2)
+            (PATCH 2)
+            (rfn 2)
+            (let-routes 1)
+            (context 2)))
+
 (use-package company
   :ensure t
   :delight company-mode
@@ -73,6 +99,9 @@
 
 (use-package crystal-mode
   :bind (("C-c C-f" . crystal-tool-format)))
+
+(use-package emmet-mode
+  :hook web-mode)
 
 (use-package helm-company
   :bind (("M-S-SPC" . helm-company)))
@@ -88,6 +117,9 @@
 This is used to override \"magit-branch-maybe-adjust-upstream\", and it just
 always sets branch.NAME.remote to origin. START-POINT is ignored."
     (magit-call-git "branch" "--set-upstream-to=origin" branch))
+
+(use-package highlight-indentation
+  :delight highlight-indentation-mode)
 
 (use-package magit
   :config
@@ -153,7 +185,7 @@ always sets branch.NAME.remote to origin. START-POINT is ignored."
 (use-package tide)
 
 (use-package web-mode
-  :mode "\\.\\(ejs\\|erb\\|ecr\\|html\\)\\'"
+  :mode "\\.\\(jsx\\|html?\\|ejs\\|ecr\\|erb\\)\\'"
   :config
   (add-hook 'web-mode-hook 'emmet-mode))
 
@@ -166,6 +198,33 @@ always sets branch.NAME.remote to origin. START-POINT is ignored."
 ;;   :config
 ;;   (define-key yas-minor-mode-map (kbd "<tab>") nil)
 ;;   (define-key yas-minor-mode-map (kbd "TAB") nil))
+
+;; (use-package typescript-mode
+;;   :mode "\\.tsx\\'")
+
+;; (use-package tide
+;;   :config
+;;   (defun setup-tide-mode ()
+;;     "Set up tide mode in the current buffer.  Have hooks call this."
+;;     (tide-setup)
+;;     (setq flycheck-check-syntax-automatically '(save mode-enabled))
+;;     (tide-hl-identifier-mode +1))
+;;   ;; (add-hook 'web-mode-hook
+;;   ;;           (lambda ()
+;;   ;;             (when (string-equal "tsx" (file-name-extension buffer-file-name))
+;;   ;;               (setup-tide-mode))))
+;;   (flycheck-add-mode 'typescript-tslint 'web-mode)
+;;   (setq company-tooltip-align-annotations t)
+;;   (add-hook 'before-save-hook 'tide-format-before-save)
+;;   (add-hook 'typescript-mode-hook #'setup-tide-mode))
+
+;; (use-package flymake
+;;   :bind (("M-n" . flymake-goto-next-error)
+;;          ("M-p" . flymake-goto-prev-error)))
+
+(use-package yasnippet
+  :init (yas-global-mode 1)
+  :bind (("C-c tab" . yas-next-field-or-maybe-expand)))
 
 ;; (use-package typescript-mode
 ;;   :mode "\\.tsx\\'")
@@ -232,6 +291,13 @@ always sets branch.NAME.remote to origin. START-POINT is ignored."
         (message "No file name for current buffer")
       (kill-new (file-name-nondirectory filename)))))
 
+(defun fix-commit-editmsg ()
+  "Add an empty line as line 2, move cursor in to position for typing."
+  (interactive)
+  (move-end-of-line nil)
+  (newline)
+  (move-end-of-line 0))
+
 (defun insert-branch-name ()
   "When making a commit in magit, insert the branch's name as the first word of the commit."
   (interactive)
@@ -247,26 +313,6 @@ always sets branch.NAME.remote to origin. START-POINT is ignored."
             (insert ticket-name)))))
     (end-of-line)
     (insert " ")))
-
-
-
-
-
-;; (defun position-cursor-in-commit-buffer ()
-;;   "Move the cursor to the end of any text in the first line of the commit buffer."
-;;   (interactive)
-;;   (move-end-of-line nil))
-
-;; Add a newline as line 2, then move to end of line 1 (assuming starting at pos 0)
-;; (fset 'fix-commit-editmsg
-;;       [?\C-e return ?\C-b ? ])
-
-(defun fix-commit-editmsg ()
-  "Add an empty line as line 2, move cursor in to position for typing."
-  (interactive)
-  (move-end-of-line nil)
-  (newline)
-  (move-end-of-line 0))
 
 (defun wrap-in-$l ()
   "Wrap a string in $l()."
@@ -302,9 +348,18 @@ always sets branch.NAME.remote to origin. START-POINT is ignored."
 (recentf-mode)
 
 (add-hook 'prog-mode-hook 'highlight-indentation-mode)
-;; (add-hook 'prog-mode-hook 'auto-save-mode)
 
 (add-hook 'emacs-lisp-mode-hook 'flymake-mode)
+
+(add-hook 'org-mode-hook
+          '(lambda ()
+             (toggle-truncate-lines -1)
+             (toggle-word-wrap 1)
+             ;; (refill-mode 1)
+             ))
+
+(add-hook 'prog-mode-hook 'highlight-indentation-mode)
+;; (add-hook 'prog-mode-hook 'auto-save-mode)
 
 (add-hook 'before-save-hook
           'delete-trailing-whitespace)
@@ -358,6 +413,8 @@ always sets branch.NAME.remote to origin. START-POINT is ignored."
 ;;;;;;;;;;;;;;;;;;;
 ;; Misc settings ;;
 ;;;;;;;;;;;;;;;;;;;
+
+(set-fill-column 80)
 
 (setq mouse-wheel-progressive-speed nil)
 (setq inhibit-startup-screen t)
