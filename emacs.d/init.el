@@ -267,6 +267,15 @@ always sets branch.NAME.remote to origin. START-POINT is ignored."
     (if (= start (point))
         (beginning-of-line))))
 
+(defun copy-and-comment-line ()
+  "Duplicate the line at point, and comment out the first copy."
+  (interactive)
+  (kill-whole-line)
+  (yank)
+  (yank)
+  (forward-line -2)
+  (comment-line 1))
+
 (defun insert-line-before-and-indent ()
   "Insert a new line before the current line, keeping both at the same level of indentation."
   (interactive)
