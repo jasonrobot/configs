@@ -1,9 +1,6 @@
 ;;; package --- init.el
 ;;; Commentary:
 
-;; TODO:
-;; set truncate lines and word wrap in org mode
-
 ;;; Code:
 
 ;; do this, since I usually run fish
@@ -357,18 +354,15 @@ always sets branch.NAME.remote to origin. START-POINT is ignored."
 (recentf-mode)
 
 (add-hook 'prog-mode-hook 'highlight-indentation-mode)
+;; (add-hook 'prog-mode-hook 'auto-save-mode)
 
 (add-hook 'emacs-lisp-mode-hook 'flymake-mode)
 
 (add-hook 'org-mode-hook
           '(lambda ()
-             (toggle-truncate-lines -1)
-             (toggle-word-wrap 1)
              ;; (refill-mode 1)
-             ))
-
-(add-hook 'prog-mode-hook 'highlight-indentation-mode)
-;; (add-hook 'prog-mode-hook 'auto-save-mode)
+             (toggle-truncate-lines -1)
+             (toggle-word-wrap 1)))
 
 (add-hook 'before-save-hook
           'delete-trailing-whitespace)
