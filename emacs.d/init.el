@@ -220,6 +220,17 @@
     (if (= start (point))
         (beginning-of-line))))
 
+(defun copy-and-comment-line ()
+  "Duplicate the line at point, and comment out the first copy."
+  (interactive)
+  (let ((column (- (point) (line-beginning-position))))
+    (kill-whole-line 0)
+    (yank)
+    (comment-line 1)
+    (yank)
+    (beginning-of-line)
+    (forward-char column)))
+
 (defun insert-line-before-and-indent ()
   "Insert a new line before the current line, keeping both at the same level of indentation."
   (interactive)
