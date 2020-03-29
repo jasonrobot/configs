@@ -10,6 +10,8 @@
 ;; Packages ;;
 ;;;;;;;;;;;;;;
 
+(load "~/.emacs.d/helm-magit-recent-branches.el")
+
 (require 'package)
 
 ;; (add-to-list 'package-archives
@@ -44,8 +46,15 @@
 
 (defun -strip-newlines-from-json (args) ;(output checker buffer)
   "Remove newlines from the first element of ARGS."
-  (setcar args (replace-regexp-in-string "\n" "" (car args)))
-  args)
+  (cons (replace-regexp-in-string "\n" "" (car args))
+        (cdr args)))
+
+(defun -strip-warning-message-from-tslint (args) ;(output checker buffer)
+  "Remove a tslint error from ARGS that causes them to be invalid JSON."
+  (cons (replace-regexp-in-string "=\\{13\\}\n\\(.*\n\\)*=\\{13\\}\n"
+                                  ""
+                                  (car args))
+        (cdr args)))
 
 (use-package flycheck
   :ensure t
@@ -61,7 +70,9 @@
   (flycheck-add-mode 'javascript-eslint 'js2-mode)
   (advice-add 'flycheck-parse-eslint
               :filter-args
-              #'-strip-newlines-from-json))
+              (lambda (args)
+                (-strip-warning-message-from-tslint
+                 (-strip-newlines-from-json args)))))
 
 (use-package anzu
   :delight anzu-mode
@@ -100,25 +111,39 @@
 (use-package emmet-mode
   :hook web-mode)
 
+(use-package helm
+  :ensure t)
+
 (use-package helm-company
   :bind (("M-S-SPC" . helm-company)))
 
-(defun my-fix-diff-range (range)
-  "Change the diff RANGE from using three dots (useless) to two (normal)."
-  (when (stringp range)
-    (s-replace "..." ".." range)))
+(use-package helm-ls-git
+  :ensure t
+  :after (helm projectile) ;after projectile, so these key bindings are last
+  :bind (("C-c p f" . helm-ls-git-ls)))
 
-(defun my-always-make-upstream-origin (branch start-point)
-  "None of your shenanigans, Magit! I ALWAYS want BRANCH upstream to be origin!
-
-This is used to override \"magit-branch-maybe-adjust-upstream\", and it just
-always sets branch.NAME.remote to origin. START-POINT is ignored."
-    (magit-call-git "branch" "--set-upstream-to=origin" branch))
+(use-package helm-projectile
+  :after (projectile) ; Must be set up after projectile
+  :bind (("C-c p s" . helm-projectile-rg)))
 
 (use-package highlight-indentation
   :delight highlight-indentation-mode)
 
+(use-package js2-mode
+  :ensure t
+  :mode "\\.m?js\\'"
+  :delight "JS²"
+  :bind (("C-." . js2-next-error))
+  :config
+  (setq js2-global-externs
+        '("ontraport"
+          "setTimeout" "setInterval" "clearTimeout" "clearInterval"
+          "describe" "it" "beforeEach" "afterEach" "beforeAll" "afterAll" "expect" "jasmine"
+          "Globalize"
+          "test_runner" "steal" "$" "$l" "_" "go" "ObjectAnimate")))
+
 (use-package magit
+  :bind (("C-c b" . helm-magit-recent-branches))
   :config
   (advice-add 'magit-diff--dwim
               :filter-return
@@ -141,32 +166,6 @@ always sets branch.NAME.remote to origin. START-POINT is ignored."
   (unbind-key "C-c p l" projectile-mode-map)
   (unbind-key "C-c p f" projectile-mode-map))
 
-(use-package helm-projectile
-  :bind (("C-c p s" . helm-projectile-rg)))
-
-(use-package highlight-indentation
-  :delight highlight-indentation-mode)
-
-(use-package js2-mode
-  :ensure t
-  :mode "\\.m?js\\'"
-  :delight "JS²"
-  :bind (("C-." . js2-next-error))
-  :config
-  (setq js2-global-externs
-        '("ontraport"
-          "setTimeout" "setInterval" "clearTimeout" "clearInterval"
-          "describe" "it" "beforeEach" "afterEach" "beforeAll" "afterAll" "expect" "jasmine"
-          "Globalize"
-          "test_runner" "steal" "$" "$l" "_" "go" "ObjectAnimate")))
-
-;; elpy and tide are disabled, try to replace them with eglot or lsp-mode! Except for JS2. for now.
-;; (use-package elpy
-;;   :ensure t
-;;   :config
-;;   (setq elpy-rpc-python-command "python3")
-;;   :init (elpy-enable))
-
 (use-package php-mode
   :mode "\\.php\\'"
   :config
@@ -179,77 +178,34 @@ always sets branch.NAME.remote to origin. START-POINT is ignored."
   :config
   (setq inferior-lisp-program "sbcl"))
 
-(use-package tide)
+(use-package tide
+  :ensure t
+  :after (typescript-mode company flycheck)
+  :hook ((typescript-mode . tide-setup)
+         (typescript-mode . tide-hl-identifier-mode))
+  ;; (before-save . tide-format-before-save)))
+  :config
+  (advice-add 'tide-format
+            :override
+            (lambda () nil))) ;TODO use eslint to format this.
+
+(use-package typescript-mode
+  :bind (("M-j" . js2-line-break)))
 
 (use-package web-mode
-  :mode "\\.\\(jsx\\|html?\\|ejs\\|ecr\\|erb\\)\\'"
+  :mode "\\.\\(ejs\\|erb\\|ecr\\|html\\)\\'"
   :config
   (add-hook 'web-mode-hook 'emmet-mode))
 
 (use-package which-key
   :delight which-key-mode)
 
-;; (use-package yasnippet
-;;   :init (yas-global-mode 1)
-;;   :bind (("C-c <tab>" . yas-expand))
-;;   :config
-;;   (define-key yas-minor-mode-map (kbd "<tab>") nil)
-;;   (define-key yas-minor-mode-map (kbd "TAB") nil))
-
-;; (use-package typescript-mode
-;;   :mode "\\.tsx\\'")
-
-;; (use-package tide
-;;   :config
-;;   (defun setup-tide-mode ()
-;;     "Set up tide mode in the current buffer.  Have hooks call this."
-;;     (tide-setup)
-;;     (setq flycheck-check-syntax-automatically '(save mode-enabled))
-;;     (tide-hl-identifier-mode +1))
-;;   ;; (add-hook 'web-mode-hook
-;;   ;;           (lambda ()
-;;   ;;             (when (string-equal "tsx" (file-name-extension buffer-file-name))
-;;   ;;               (setup-tide-mode))))
-;;   (flycheck-add-mode 'typescript-tslint 'web-mode)
-;;   (setq company-tooltip-align-annotations t)
-;;   (add-hook 'before-save-hook 'tide-format-before-save)
-;;   (add-hook 'typescript-mode-hook #'setup-tide-mode))
-
-;; (use-package flymake
-;;   :bind (("M-n" . flymake-goto-next-error)
-;;          ("M-p" . flymake-goto-prev-error)))
-
 (use-package yasnippet
   :init (yas-global-mode 1)
-  :bind (("C-c tab" . yas-next-field-or-maybe-expand)))
-
-;; (use-package typescript-mode
-;;   :mode "\\.tsx\\'")
-
-;; (use-package tide
-;;   :config
-;;   (defun setup-tide-mode ()
-;;     "Set up tide mode in the current buffer.  Have hooks call this."
-;;     (tide-setup)
-;;     (setq flycheck-check-syntax-automatically '(save mode-enabled))
-;;     (tide-hl-identifier-mode +1))
-;;   ;; (add-hook 'web-mode-hook
-;;   ;;           (lambda ()
-;;   ;;             (when (string-equal "tsx" (file-name-extension buffer-file-name))
-;;   ;;               (setup-tide-mode))))
-;;   (flycheck-add-mode 'typescript-tslint 'web-mode)
-;;   (setq company-tooltip-align-annotations t)
-;;   (add-hook 'before-save-hook 'tide-format-before-save)
-;;   (add-hook 'typescript-mode-hook #'setup-tide-mode))
-
-;; (use-package flymake
-;;   :bind (("M-n" . flymake-goto-next-error)
-;;          ("M-p" . flymake-goto-prev-error)))
-
-;; keep this package after projectile, so these key bindings are last
-(use-package helm-ls-git
-  :ensure t
-  :bind (("C-c p f" . helm-ls-git-ls)))
+  :bind (("<f12>" . yas-expand))
+  :config
+  (define-key yas-minor-mode-map (kbd "<tab>") nil)
+  (define-key yas-minor-mode-map (kbd "TAB") nil))
 
 ;;;;;;;;;;;;;;;
 ;; Functions ;;
@@ -320,6 +276,18 @@ always sets branch.NAME.remote to origin. START-POINT is ignored."
     (insert "$l( ")
     (forward-sexp)
     (insert " )")))
+
+(defun my-fix-diff-range (range)
+  "Change the diff RANGE from using three dots (useless) to two (normal)."
+  (when (stringp range)
+    (s-replace "..." ".." range)))
+
+(defun my-always-make-upstream-origin (branch start-point)
+  "None of your shenanigans, Magit! I ALWAYS want BRANCH upstream to be origin!
+
+This is used to override \"magit-branch-maybe-adjust-upstream\", and it just
+always sets branch.NAME.remote to origin. START-POINT is ignored."
+    (magit-call-git "branch" "--set-upstream-to=origin" branch))
 
 ;; A macro/function to find the next function definition in a JS file.
 (fset 'js-next-function
@@ -408,7 +376,7 @@ always sets branch.NAME.remote to origin. START-POINT is ignored."
 ;; Misc settings ;;
 ;;;;;;;;;;;;;;;;;;;
 
-(set-fill-column 80)
+(set-fill-column 120)
 
 (setq mouse-wheel-progressive-speed nil)
 (setq inhibit-startup-screen t)

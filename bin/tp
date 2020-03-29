@@ -1,0 +1,42 @@
+#!/usr/bin/env fish
+
+function turn-on
+    echo "turning on"
+    synclient touchpadoff=0
+end
+
+function turn-off
+    echo "turning off"
+    synclient touchpadoff=1
+end
+
+function print-help
+    echo "USAGE: touchpad-control [on|off]"
+    echo ""
+    echo "use this to enable or disable the laptop touchpad"
+    echo ""
+    echo "no args will toggle the state, and print what it did in stdout"
+    echo "'on' or 'off' will do what you think"
+end
+
+if test (count $argv) -eq 0
+    set -l current (synclient | grep -i touchpadoff | awk "{print \$3}")
+    
+    if test $current -eq 0
+        turn-off
+    else
+        turn-on
+    end
+else    
+    if test $argv = "on"
+        turn-on
+    else if test $argv = "off"
+        turn-off
+    else if test $argv = "-h"
+        print-help
+    else
+        echo "Invalid argument: " $argv
+        echo ""
+        print-help
+    end    
+end

@@ -1,0 +1,14 @@
+#! /usr/bin/env perl
+use strict;
+
+my $default = 9;
+my $lines = $ARGV[0] || $default;
+$lines = 3 if $lines < 0;
+
+for( my $i = $lines; $i > 0; $i-- ) {
+    if ( $i == ($lines / 2) ||
+         $i == (($lines + 1) / 2) ) {
+        print "================================================================================";
+    }
+    print "\n";
+}
