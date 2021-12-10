@@ -10,8 +10,6 @@
 ;; Packages ;;
 ;;;;;;;;;;;;;;
 
-(load "~/.emacs.d/helm-magit-recent-branches.el")
-
 (require 'package)
 
 ;; (add-to-list 'package-archives
@@ -21,7 +19,7 @@
 ;;temp fix till elpa stops being weird
 (setq package-archives
       '(("gnu" . "http://elpa.gnu.org/packages/")
-        ("mepla" . "http://melpa.milkbox.net/packages/")))
+        ("mepla" . "http://melpa.org/packages/")))
 
 (package-initialize)
 
@@ -29,9 +27,13 @@
   (package-install 'use-package))
 
 (use-package avy
-  :bind (("C-:" . 'avy-goto-char)))
+  :bind (("C-:" . 'avy-goto-char)
+         ("C-M-:" . 'avy-goto-char-2)))
 
 (use-package better-defaults
+  :ensure t)
+
+(use-package cider
   :ensure t)
 
 (use-package delight
@@ -42,7 +44,8 @@
   :bind (("M-x" . helm-M-x)
          ("C-x C-f" . helm-find-files)
          ("C-x b" . helm-buffers-list)
-         ("M-y" . helm-show-kill-ring)))
+         ("M-y" . helm-show-kill-ring)
+         ("C-h o" . helm-apropos)))
 
 (defun -strip-newlines-from-json (args) ;(output checker buffer)
   "Remove newlines from the first element of ARGS."
@@ -70,9 +73,10 @@
   (flycheck-add-mode 'javascript-eslint 'js2-mode)
   (advice-add 'flycheck-parse-eslint
               :filter-args
-              (lambda (args)
-                (-strip-warning-message-from-tslint
-                 (-strip-newlines-from-json args)))))
+              #'-strip-newlines-from-json)
+  (advice-add 'flycheck-parse-eslint
+              :filter-args
+              #'-strip-warning-message-from-tslint))
 
 (use-package anzu
   :delight anzu-mode
@@ -97,7 +101,8 @@
             (PATCH 2)
             (rfn 2)
             (let-routes 1)
-            (context 2)))
+            (context 2))
+  :bind (("C-:" . 'avy-goto-char)))
 
 (use-package company
   :ensure t
@@ -108,8 +113,16 @@
 (use-package crystal-mode
   :bind (("C-c C-f" . crystal-tool-format)))
 
+(use-package dash)
+
 (use-package emmet-mode
   :hook web-mode)
+
+(use-package forge
+  :after magit)
+
+(use-package gradle-mode
+  :mode "\\.gradle\\'")
 
 (use-package helm
   :ensure t)
@@ -142,6 +155,11 @@
           "Globalize"
           "test_runner" "steal" "$" "$l" "_" "go" "ObjectAnimate")))
 
+(use-package kotlin-mode
+  :mode "\\.kt\\'")
+
+(load "~/.emacs.d/helm-magit-recent-branches.el")
+
 (use-package magit
   :bind (("C-c b" . helm-magit-recent-branches))
   :config
@@ -170,6 +188,8 @@
   :mode "\\.php\\'"
   :config
   (add-hook 'php-mode-hook (lambda () (flycheck-mode -1))))
+
+(use-package request)
 
 ;; hyper-useful string library
 (use-package s)
@@ -223,13 +243,11 @@
 (defun copy-and-comment-line ()
   "Duplicate the line at point, and comment out the first copy."
   (interactive)
-  (let ((column (- (point) (line-beginning-position))))
-    (kill-whole-line 0)
-    (yank)
-    (comment-line 1)
-    (yank)
-    (beginning-of-line)
-    (forward-char column)))
+  (kill-whole-line)
+  (yank)
+  (yank)
+  (forward-line -2)
+  (comment-line 1))
 
 (defun insert-line-before-and-indent ()
   "Insert a new line before the current line, keeping both at the same level of indentation."
@@ -274,7 +292,7 @@
         (let ((ticket-name (match-string 2 branch-line)))
           (when ticket-name
             (goto-char 0)
-            (insert ticket-name)))))
+            (insert "[" ticket-name "]")))))
     (end-of-line)
     (insert " ")))
 
@@ -339,6 +357,7 @@ always sets branch.NAME.remote to origin. START-POINT is ignored."
 
 (add-hook 'git-commit-setup-hook
           'fix-commit-editmsg)
+          ;; 'insert-branch-name)
 
 (let ((disable-line-numbers
        '(lambda ()
@@ -391,13 +410,15 @@ always sets branch.NAME.remote to origin. START-POINT is ignored."
 
 (setq mouse-wheel-progressive-speed nil)
 (setq inhibit-startup-screen t)
-(add-to-list 'default-frame-alist '(font . "Roboto Mono 9"))
+(add-to-list 'default-frame-alist '(font . "Roboto Mono 10"))
 ;; (add-to-list 'default-frame-alist '(font . "Noto Sans Mono 8"))
 
 (setq custom-file "~/.emacs.d/custom.el")
 (load custom-file)
 
 (put 'upcase-region 'disabled nil)
+(put 'downcase-region 'disabled nil)
 
 (provide 'init)
 ;;; init.el ends here
+
