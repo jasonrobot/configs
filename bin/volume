@@ -1,0 +1,17 @@
+#!/usr/bin/env fish
+
+set -l current_sinks (pactl list short sinks | grep -i "running" | awk "{ print \$1 }")
+
+for sink in $current_sinks
+    switch $argv[1]
+        case mute unmute
+            echo "toggling mute"
+            pactl set-sink-mute $sink toggle
+        case up
+            echo "volume up"
+            pactl set-sink-volume $sink +4%
+        case down
+            echo "volume down"
+            pactl set-sink-volume $sink -4%
+    end
+end
