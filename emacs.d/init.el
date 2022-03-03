@@ -133,7 +133,7 @@
 (use-package helm-ls-git
   :ensure t
   :after (helm projectile) ;after projectile, so these key bindings are last
-  :bind (("C-c p f" . helm-ls-git-ls)))
+  :bind (("C-c p f" . helm-ls-git)))
 
 (use-package helm-projectile
   :after (projectile) ; Must be set up after projectile

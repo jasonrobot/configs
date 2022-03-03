@@ -19,6 +19,7 @@ set $myFn Control+Mod4
 
 # This font is widely installed, provides lots of unicode glyphs, right-to-left
 # text rendering and scalability on retina/hidpi displays (thanks to pango).
+# font pango:DejaVu Sans Mono 10
 font pango:Roboto Mono 8
 
 # Before i3 v4.8, we used to recommend this one as the default:
@@ -221,7 +222,7 @@ client.urgent               $rd        $rd         $tx
 
 exec xsetroot -solid \#232323
 exec caffeine
-exec redshift -l 34.429528:-119.795303 -b 0.9:0.8 -t 4000:2750
+exec redshift -l 34.429528:-119.795303 -b 0.9:0.8 -t 4000:2900
 # exec emacs --daemon
 exec setxkbmap -option compose:caps
 exec udiskie --tray
@@ -259,9 +260,17 @@ bindsym Print exec xfce4-screenshooter
 bindsym XF86MonBrightnessUp exec xbacklight -inc 5
 bindsym XF86MonBrightnessDown exec xbacklight -dec 5
 
+# bindsym XF86AudioRaiseVolume exec pactl set-sink-volume 1 +4%
+# bindsym XF86AudioLowerVolume exec pactl set-sink-volume 1 -4%
+# bindsym $myFn+F4 exec pactl set-sink-volume 1 +4%
+# bindsym $myFn+F3 exec pactl set-sink-volume 1 -4%
+# bindsym $myFn+F2 exec --no-startup-id pactl set-sink-mute 1 toggle # mute sound
 bindsym XF86AudioRaiseVolume exec volume up
 bindsym XF86AudioLowerVolume exec volume down
-bindsym XF86AudioMute exec volume mute
+# bindsym XF86AudioMute exec volume mute
+bindsym $myFn+F4 exec volume up
+bindsym $myFn+F3 exec volume down
+# bindsym $myFn+F2 exec volume mute
 
 # this one is a hack to disable ctrl-q in firefox
 bindsym Ctrl+q exec ~/noctrlq.sh
@@ -269,3 +278,4 @@ bindsym $mod+q exec --no-startup-id $Locker
 
 #hide edge borders when there is only 1 window visible
 #hide_edge_borders smart
+
