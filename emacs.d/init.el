@@ -6,6 +6,13 @@
 ;; do this, since I usually run fish
 (setq shell-file-name "/bin/bash")
 
+;;;;;;;;;;;;;;;;
+;; Load files ;;
+;;;;;;;;;;;;;;;;
+
+(load "~/.emacs.d/functions.el")
+(load "~/.emacs.d/fish-colors.el")
+
 ;;;;;;;;;;;;;;
 ;; Packages ;;
 ;;;;;;;;;;;;;;
@@ -35,6 +42,15 @@
   :ensure t)
 
 (use-package cider)
+
+(use-package copilot
+  :ensure t
+  ;; :hook ((prog-mode . copilot-mode)
+  ;;        (text-mode . copilot-mode))
+  :bind (("C-c c <tab>" . copilot-complete)
+         ("C-c c SPC" . copilot-accept-completion)
+         ("C-c c n" . copilot-next-completion)
+         ("C-c c p" . copilot-previous-completion)))
 
 (use-package helm
   :ensure t
@@ -102,7 +118,7 @@
   :ensure t
   :delight company-mode
   :config (setq company-idle-delay nil)
-  :hook ((typescript-ts-mode . company-mode))
+  ;; :hook ((typescript-ts-mode . company-mode))
   :bind (("M-SPC" . company-complete)))
 
 (use-package crystal-mode
@@ -141,9 +157,13 @@
   :after (projectile) ; Must be set up after projectile
   :bind (("C-c p s" . helm-projectile-rg)))
 
-(use-package highlight-indentation
+;; (use-package highlight-indentation
+;;   :ensure t
+;;   :delight highlight-indentation-mode)
+
+(use-package highlight-indent-guides
   :ensure t
-  :delight highlight-indentation-mode)
+  :delight highlight-indent-guides-mode)
 
 (use-package js2-mode
   :ensure t
@@ -177,6 +197,8 @@
             (lambda (ret)
               (s-replace-regexp ".*\\(PORT-[0-9]\\{4,5\\}\\).*" "\\1" ret))))
 
+;; (use-package ng2-mode)
+
 (use-package projectile
   :ensure t
   :delight
@@ -200,6 +222,8 @@
 (use-package request
   :ensure t)
 
+(use-package rustic)
+
 ;; hyper-useful string library
 (use-package s
   :ensure t)
@@ -209,14 +233,25 @@
 ;;   :config
 ;;   (setq inferior-lisp-program "sbcl"))
 
+;; (use-package tide :ensure t ;; :mode "\\.ts\\'" :after (company flycheck))
+
 (use-package tide
   :ensure t
-  :after (typescript-ts-mode company flycheck)
-  :init
-  (add-hook 'before-save-hook 'tide-format-before-save)
-  (add-hook 'typescript-ts-mode-hook #'setup-tide-mode)
-  :config
-  (setq tide-format-options '(:indentSize 2)))
+  :after (company flycheck)
+  :hook (
+         ;; (typescript-ts-mode . tide-setup)
+         ;; (tsx-ts-mode . tide-setup)
+         ;; (typescript-mode . tide-setup)
+         (typescript-ts-mode . tide-hl-identifier-mode)
+         (before-save . tide-format-before-save)
+         ))
+
+
+  ;; :init
+  ;; (add-hook 'before-save-hook 'tide-format-before-save)
+  ;; (add-hook 'typescript-ts-mode-hook #'setup-tide-mode)
+  ;; :config
+  ;; (setq tide-format-options '(:indentSize 2)))
 
   ;; :config
   ;; (advice-add 'tide-format
@@ -225,12 +260,18 @@
 
 ;; (use-package typescript-mode
 ;;   :ensure t
-;;   :after (js2-mode)
+;;   ;; :after (js2-mode)
 ;;   ;; :bind (("<RET>" . c-indent-new-comment-line)))
-;;   :bind (("M-j" . js2-line-break)))
+;;   ;; :bind (("M-j" . js2-line-break)))
+;;   )
 
 (use-package typescript-ts-mode
-  :mode "\\.ts\\'")
+  :mode "\\.ts\\'"
+  ;; :hook (tide-mode setup-tide-mode))
+  :init
+  (add-hook 'typescript-ts-mode-hook #'setup-tide-mode)
+  ;; (add-hook 'typescript-ts-mode-hook 'eglot-ensure)
+  )
 
 (use-package web-mode
   :ensure t
@@ -258,8 +299,9 @@
 ;; Functions ;;
 ;;;;;;;;;;;;;;;
 
-(load "~/.emacs.d/functions.el")
-(load "~/.emacs.d/fish-colors.el")
+(defvar my-gc-daily-timer)
+
+(setq my-gc-daily-timer (run-at-time t (* 60 60 24) #'(lambda () (garbage-collect))))
 
 ;;;;;;;;;;;
 ;; Modes ;;
@@ -273,7 +315,8 @@
 (column-number-mode)
 (recentf-mode)
 
-(add-hook 'prog-mode-hook 'highlight-indentation-mode)
+;; (add-hook 'prog-mode-hook 'highlight-indentation-mode)
+(add-hook 'prog-mode-hook 'highlight-indent-guides-mode)
 ;; (add-hook 'prog-mode-hook 'auto-save-mode)
 
 (add-hook 'emacs-lisp-mode-hook 'flymake-mode)
@@ -298,7 +341,12 @@
   (add-hook 'magit-mode-hook disable-line-numbers)
   (add-hook 'term-mode-hook disable-line-numbers))
 
-(delight '((subword-mode "" "subword")))
+;; (delight '((subword-mode "" "subword")))
+
+(defvar my-ediff-last-windows nil)
+
+(add-hook 'ediff-before-setup-hook #'my-save-ediff-last-windows)
+(add-hook 'ediff-quit-hook #'my-restore-ediff-last-windows)
 
 ;;;;;;;;;;;;;;;;;
 ;; Keybindings ;;
@@ -329,14 +377,30 @@
      (interactive)
      (scroll-up-command -16)))
 
+;; c component, t template, s stylesheet, j jasmine/test
+
+(global-set-key
+ (kbd "C-c a c")
+ 'my-angular-open-component)
+
+(global-set-key
+ (kbd "C-c a t")
+ 'my-angular-open-template)
+
+(global-set-key
+ (kbd "C-c a s")
+ 'my-angular-open-stylesheet)
+
+(global-set-key
+ (kbd "C-c a j")
+ 'my-angular-open-spec)
+
 ;; Suck it hard, apple
 (global-set-key (kbd "<home>") 'beginning-of-line-or-indentation)
 (global-set-key (kbd "<end>") 'move-end-of-line)
 (global-unset-key (kbd "C-z"))
 
 (global-set-key (kbd "C-x C-c") 'ask-before-closing)
-
-
 
 ;;;;;;;;;;;;;;;;;;;
 ;; Misc settings ;;
@@ -347,7 +411,7 @@
 (setq mouse-wheel-progressive-speed nil)
 (setq inhibit-startup-screen t)
 ;; (add-to-list 'default-frame-alist '(font . "Roboto Mono 10"))
-;; (add-to-list 'default-frame-alist '(font . "Noto Sans Mono 8"))
+(add-to-list 'default-frame-alist '(font . "JetBrains Mono 13"))
 
 (setq custom-file "~/.emacs.d/custom.el")
 (load custom-file)

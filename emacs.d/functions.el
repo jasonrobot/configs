@@ -102,6 +102,7 @@ always sets branch.NAME.remote to origin. START-POINT is ignored."
 (defun setup-tide-mode ()
   "Used as a hook for typescript mode to enable tide mode with all the nice extras."
   (interactive)
+  (message "setting up tide mode")
   (tide-setup)
   (flycheck-mode +1)
   ;; (setq flycheck-check-syntax-automatically '(save mode-enabled))
@@ -136,40 +137,137 @@ always sets branch.NAME.remote to origin. START-POINT is ignored."
 (defun my-objectify ()
   "Turn a class style definition into an object one."
   (interactive)
-  (let ((start (region-beginning))
-        (end (region-end)))
+  (let* ((start (region-beginning))
+         (end (region-end)))
     (save-excursion
       (save-restriction
         (narrow-to-region start end)
         (goto-char start)
-        (re-search-forward "\\(let\\|var\\|const\\) \\([[:word:]]+\\).*new \\([[:word:]]+\\)()" end t)
-        (let ((variable-name (match-string 2)))
-
-          ;; operate on the middle, properties being set
-          (let ((body-start (save-excursion
-                              (goto-char 0)
-                              (+ 1 (line-end-position))))
-                (body-end (save-excursion
-                            (goto-char (1- (point-max)))
-                            (1- (line-beginning-position)))))
-            (save-restriction
-              (narrow-to-region body-start body-end)
-              (message "name is: %s" variable-name)
-              (replace-string-in-region (format "%s." variable-name) "")
-              (replace-string-in-region " =" ":")
-              (replace-string-in-region ";" ",")))
-
-          ;; operate on the first and last lines to return the object
-          (goto-char start)
-          (beginning-of-line)
+        (re-search-forward (rx (group-n 1 (or "let" "var" "const"))
+                               (1+ space)
+                               ;; this is the variable name
+                               (group-n 2 (1+ word))
+                               ;; could potentially have a type declaration
+                               (? (? space) ":" (? space) (1+ word))
+                               (* space)
+                               "="
+                               (* space)
+                               "new"
+                               (1+ space)
+                               ;; this is the constructor invocation, with our typename
+                               (group-n 3 (1+ word)) "()" (? ";"))
+                           end
+                           t)
+        (let ((variable-declaration (match-string 1))
+              (variable-name (match-string 2))
+              (type-name (match-string 3))
+              (body-start (save-excursion
+                            (goto-char 0)
+                            (line-beginning-position 2))))
+          ;; start on line 1, fix the declaration
+          (goto-char 0)
           (kill-line)
-          (insert "return {")
-          (goto-char end)
-          (beginning-of-line)
-          (kill-line)
-          (insert "};")
+          (insert (format "%s %s: %s = {" variable-declaration variable-name type-name))
 
-          (indent-region start end))))))
+          ;; start on the body, fix the assignment
+          (replace-regexp-in-region
+           (rx-to-string
+            `(seq
+              (* space)
+              ,variable-name "."
+              ;; property name
+              (group-n 1 (1+ (or word "_")))
+              (* space)
+              "="
+              (* space)
+              (group-n 2 (* nonl))
+              ";"))
+           "\\1: \\2,"
+           body-start
+           )
+
+          (goto-char (point-max))
+          (insert "}")
+          (newline)
+          (indent-region 0 (point-max))
+          )))))
+
+
+(defun my-save-ediff-last-windows ()
+  (setq my-ediff-last-windows (current-window-configuration)))
+
+(defun my-restore-ediff-last-windows ()
+  (set-window-configuration my-ediff-last-windows))
+
+(defun my-set-font-size ()
+  "Prompt user for a font size to set for this frame."
+  (interactive)
+  (let ((size (read-number "Font size:")))
+    (set-frame-font (format "-*-JetBrains Mono-regular-normal-normal-*-%d-*-*-*-m-0-iso10646-1" size))))
+
+;;; Angular component navigation helper functions
+
+(defun my-angular-open-other (suffix)
+  "Open another file for this angular component ending in SUFFIX."
+  (let ((filename (buffer-file-name)))
+    (save-match-data
+      (let ((component-regexp (rx (group (1+ (in alnum "-")))
+                                  "."
+                                  (group (or "component" "service"))
+                                  "."
+                                  (group (1+ word)))))
+        (if (string-match component-regexp filename)
+            (let ((component-name (match-string 1 filename))
+                  (component-or-service (match-string 2 filename))
+                  (component-suffix (match-string 3 filename)))
+              (if (and (string-equal component-or-service "service")
+                       (or (string-equal suffix "html") (string-equal suffix "scss")))
+                  (message (format "Cannot open for %s service" suffix))
+                (find-file (concat component-name "." component-or-service "." suffix))))
+          (message "Not an angular component"))))))
+
+(defun my-angular-open-template ()
+  "Open the html template for the current component."
+  (interactive)
+  (my-angular-open-other "html"))
+
+(defun my-angular-open-stylesheet ()
+  "Open the stylesheet for the current component."
+  (interactive)
+  (my-angular-open-other "scss"))
+
+(defun my-angular-open-component ()
+  "Open the component code for the current component."
+  (interactive)
+  (my-angular-open-other "ts"))
+
+(defun my-angular-open-spec ()
+  "Open the spec/test for the current component."
+  (interactive)
+  (my-angular-open-other "spec.ts"))
+
+(defvar my-gc-daily-timer)
+
+;; (defun my-start-gc-daily ()
+;;   "Start a timer to collect garbage once a day."
+;;   (setq my-gc-daily-timer (run-at-time t (* 60 60 24) #'(lambda () (garbage-collect)))))
+
+;; (defun my-stop-gc-daily ()
+;;   (cancel-timer my-gc-daily-timer))
+
+;; ^.+m?js.+
+(defun my-clean-stacktrace ()
+  "Trim a stacktrace down to just our frames."
+  (interactive)
+
+  (let* ((start (region-beginning))
+         (end (region-end)))
+    (replace-regexp-in-region
+     (rx line-start (1+ nonl) (? "m") "js" (1+ nonl) "
+")
+     ""
+     start
+     end)))
 
 (provide 'functions)
 ;;; functions.el ends here
