@@ -12,6 +12,7 @@
 
 (load "~/.emacs.d/functions.el")
 (load "~/.emacs.d/fish-colors.el")
+(load "~/.emacs.d/helm-magit-recent-branches.el")
 
 ;;;;;;;;;;;;;;
 ;; Packages ;;
@@ -41,7 +42,7 @@
 (use-package better-defaults
   :ensure t)
 
-(use-package cider)
+;; (use-package cider)
 
 (use-package copilot
   :ensure t
@@ -72,6 +73,9 @@
                                   (car args))
         (cdr args)))
 
+(use-package eldoc
+  :delight)
+
 (use-package fish-mode
   :ensure t)
 
@@ -96,34 +100,35 @@
   :delight anzu-mode
   :config (global-anzu-mode))
 
-(use-package cider)
+;; (use-package cider)
 
-(use-package clojure-mode
-  :config (define-clojure-indent ; this is for routes in compojure
-            (defroutes 'defun)
-            (GET 2)
-            (POST 2)
-            (PUT 2)
-            (DELETE 2)
-            (HEAD 2)
-            (ANY 2)
-            (OPTIONS 2)
-            (PATCH 2)
-            (rfn 2)
-            (let-routes 1)
-            (context 2))
-  :bind (("C-:" . 'avy-goto-char)))
+;; (use-package clojure-mode
+;;   :config (define-clojure-indent ; this is for routes in compojure
+;;             (defroutes 'defun)
+;;             (GET 2)
+;;             (POST 2)
+;;             (PUT 2)
+;;             (DELETE 2)
+;;             (HEAD 2)
+;;             (ANY 2)
+;;             (OPTIONS 2)
+;;             (PATCH 2)
+;;             (rfn 2)
+;;             (let-routes 1)
+;;             (context 2))
+;;   :bind (("C-:" . 'avy-goto-char)))
 
 (use-package company
   :ensure t
   :delight company-mode
   :config (setq company-idle-delay nil)
   ;; :hook ((typescript-ts-mode . company-mode))
+  :hook ((after-init . global-company-mode))
   :bind (("M-SPC" . company-complete)))
 
-(use-package crystal-mode
-  :ensure t
-  :bind (("C-c C-f" . crystal-tool-format)))
+;; (use-package crystal-mode
+;;   :ensure t
+;;   :bind (("C-c C-f" . crystal-tool-format)))
 
 (use-package dash
   :ensure t)
@@ -136,9 +141,9 @@
   :ensure t
   :after magit)
 
-(use-package gradle-mode
-  ;; :ensure t
-  :mode "\\.gradle\\'")
+;; (use-package gradle-mode
+;;   ;; :ensure t
+;;   :mode "\\.gradle\\'")
 
 (use-package helm
   :ensure t)
@@ -157,13 +162,13 @@
   :after (projectile) ; Must be set up after projectile
   :bind (("C-c p s" . helm-projectile-rg)))
 
-;; (use-package highlight-indentation
-;;   :ensure t
-;;   :delight highlight-indentation-mode)
-
-(use-package highlight-indent-guides
+(use-package highlight-indentation
   :ensure t
-  :delight highlight-indent-guides-mode)
+  :delight highlight-indentation-mode)
+
+;; (use-package highlight-indent-guides
+;;   :ensure t
+;;   :delight highlight-indent-guides-mode)
 
 (use-package js2-mode
   :ensure t
@@ -175,11 +180,9 @@
         '("setTimeout" "setInterval" "clearTimeout" "clearInterval"
           "describe" "it" "beforeEach" "afterEach" "beforeAll" "afterAll" "expect" "jasmine")))
 
-(use-package kotlin-mode
-  :ensure t
-  :mode "\\.kt\\'")
-
-(load "~/.emacs.d/helm-magit-recent-branches.el")
+;; (use-package kotlin-mode
+;;   :ensure t
+;;   :mode "\\.kt\\'")
 
 (use-package magit
   :ensure t
@@ -199,6 +202,32 @@
 
 ;; (use-package ng2-mode)
 
+(defun my/fast-persp-current-buffers* (&optional include-global)
+  "Same as `persp-current-buffers' but if INCLUDE-GLOBAL include buffers from
+the frame global perspective."
+  (if (not include-global)
+      (persp-current-buffers)
+    (delete-dups
+     (append (persp-current-buffers)
+             (when (member persp-frame-global-perspective-name (persp-names))
+               (let ((global-buffers (persp-buffers (persp-new persp-frame-global-perspective-name)))
+                     (global-scratch-buffer (persp-get-scratch-buffer persp-frame-global-perspective-name)))
+                 (if persp-frame-global-perspective-include-scratch-buffer
+                     global-buffers
+                   (remove global-scratch-buffer global-buffers))))))))
+
+(use-package perspective
+  :bind
+  ("C-x C-b" . persp-list-buffers)         ; or use a nicer switcher, see below
+  :custom
+  (persp-mode-prefix-key (kbd "C-c M-p"))  ; pick your own prefix key here
+  :init
+  (persp-mode)
+  :config
+  (advice-add 'persp-current-buffers*
+              :override
+              #'my/fast-persp-current-buffers*))
+
 (use-package projectile
   :ensure t
   :delight
@@ -214,15 +243,10 @@
   (unbind-key "C-c p l" projectile-mode-map)
   (unbind-key "C-c p f" projectile-mode-map))
 
-(use-package php-mode
-  :mode "\\.php\\'"
-  :config
-  (add-hook 'php-mode-hook (lambda () (flycheck-mode -1))))
-
 (use-package request
   :ensure t)
 
-(use-package rustic)
+;; (use-package rustic)
 
 ;; hyper-useful string library
 (use-package s
@@ -245,7 +269,6 @@
          (typescript-ts-mode . tide-hl-identifier-mode)
          (before-save . tide-format-before-save)
          ))
-
 
   ;; :init
   ;; (add-hook 'before-save-hook 'tide-format-before-save)
@@ -289,6 +312,7 @@
 
 (use-package yasnippet
   :ensure t
+  :delight (yas-minor-mode)
   :init (yas-global-mode 1)
   :bind (("<f12>" . yas-expand))
   :config
@@ -315,11 +339,11 @@
 (column-number-mode)
 (recentf-mode)
 
-;; (add-hook 'prog-mode-hook 'highlight-indentation-mode)
-(add-hook 'prog-mode-hook 'highlight-indent-guides-mode)
+(add-hook 'prog-mode-hook 'highlight-indentation-mode)
+;; (add-hook 'prog-mode-hook 'highlight-indent-guides-mode)
 ;; (add-hook 'prog-mode-hook 'auto-save-mode)
 
-(add-hook 'emacs-lisp-mode-hook 'flymake-mode)
+;; (add-hook 'emacs-lisp-mode-hook 'flymake-mode)
 
 (add-hook 'org-mode-hook
           #'(lambda ()
@@ -406,7 +430,8 @@
 ;; Misc settings ;;
 ;;;;;;;;;;;;;;;;;;;
 
-(set-fill-column 90)
+;; TODO set this different for typescript?
+(set-fill-column 120)
 
 (setq mouse-wheel-progressive-speed nil)
 (setq inhibit-startup-screen t)
