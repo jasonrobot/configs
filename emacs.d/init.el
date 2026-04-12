@@ -127,9 +127,9 @@
   :hook ((after-init . global-company-mode))
   :bind (("M-SPC" . company-complete)))
 
-;; (use-package crystal-mode
-;;   :ensure t
-;;   :bind (("C-c C-f" . crystal-tool-format)))
+(use-package crystal-mode
+  :ensure t
+  :bind (("C-c C-f" . crystal-tool-format)))
 
 (use-package dash
   :ensure t)
@@ -141,10 +141,6 @@
 (use-package forge
   :ensure t
   :after magit)
-
-;; (use-package gradle-mode
-;;   ;; :ensure t
-;;   :mode "\\.gradle\\'")
 
 (use-package helm
   :ensure t)
@@ -181,10 +177,6 @@
         '("setTimeout" "setInterval" "clearTimeout" "clearInterval"
           "describe" "it" "beforeEach" "afterEach" "beforeAll" "afterAll" "expect" "jasmine")))
 
-;; (use-package kotlin-mode
-;;   :ensure t
-;;   :mode "\\.kt\\'")
-
 (use-package magit
   :ensure t
   :bind (("C-c b" . helm-magit-recent-branches))
@@ -203,8 +195,6 @@
   (advice-add 'magit-worktree-branch   :after  #'my-magit-worktree-create-perspective)
   (advice-add 'magit-worktree-checkout :after  #'my-magit-worktree-create-perspective)
   (advice-add 'magit-worktree-delete   :before #'my-magit-worktree-kill-perspective))
-
-;; (use-package ng2-mode)
 
 (defun my/fast-persp-current-buffers* (&optional include-global)
   "Same as `persp-current-buffers' but if INCLUDE-GLOBAL include buffers from
@@ -262,8 +252,6 @@ the frame global perspective."
 ;;   :config
 ;;   (setq inferior-lisp-program "sbcl"))
 
-;; (use-package tide :ensure t ;; :mode "\\.ts\\'" :after (company flycheck))
-
 (use-package tide
   :ensure t
   :after (company flycheck)
@@ -285,13 +273,6 @@ the frame global perspective."
   ;; (advice-add 'tide-format
   ;;             :override
   ;;             (lambda () nil))) ;TODO use eslint to format this.
-
-;; (use-package typescript-mode
-;;   :ensure t
-;;   ;; :after (js2-mode)
-;;   ;; :bind (("<RET>" . c-indent-new-comment-line)))
-;;   ;; :bind (("M-j" . js2-line-break)))
-;;   )
 
 (use-package typescript-ts-mode
   :mode "\\.ts\\'"
@@ -370,8 +351,6 @@ the frame global perspective."
   (add-hook 'magit-mode-hook disable-line-numbers)
   (add-hook 'term-mode-hook disable-line-numbers))
 
-;; (delight '((subword-mode "" "subword")))
-
 (defvar my-ediff-last-windows nil)
 
 (add-hook 'ediff-before-setup-hook #'my-save-ediff-last-windows)
@@ -436,7 +415,7 @@ the frame global perspective."
 ;;;;;;;;;;;;;;;;;;;
 
 ;; TODO set this different for typescript?
-(set-fill-column 120)
+(set-fill-column 100)
 
 (setq mouse-wheel-progressive-speed nil)
 (setq inhibit-startup-screen t)
