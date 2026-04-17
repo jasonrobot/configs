@@ -18,7 +18,7 @@
 (require 's)
 (require 'subr-x)
 
-(defun build-helm-candidate (line)
+(defun recent-branches/build-helm-candidate (line)
   "Make a helm candidate for recent-branches from LINE."
   (let* ((branch-name (propertize (elt line 0)
                                   'face 'magit-branch-remote))
@@ -38,14 +38,14 @@
               commit-message)
             commit-date)))
 
-(defun remove-current-branch-marker-column (line)
+(defun recent-branches/remove-current-branch-marker-column (line)
   "Remove the column of the git output that indicates the current branch.
 Our git output will include a column in each LINE that we use to filter out
 the current branch.  After we remove it, it will be empty in all lines, so
 remove the first element."
   (--map (seq-drop (split-string it ";") 1) line))
 
-(defun remove-current-branch-from-lines (lines)
+(defun recent-branches/remove-current-branch-from-lines (lines)
   "Remove the current branch from LINES."
   (--reject (s-equals? "*" (s-left 1 it)) lines))
 
@@ -57,12 +57,12 @@ remove the first element."
          (git-output-lines (-> git-output
                                (s-trim)
                                (s-lines)
-                               (remove-current-branch-from-lines)
-                               (remove-current-branch-marker-column)))
+                               (recent-branches/remove-current-branch-from-lines)
+                               (recent-branches/remove-current-branch-marker-column)))
          ;; get the list of branch names
          (branch-names (-map 'car git-output-lines))
          ;; format that into a nice thing we can show the user - we'll be matching of the index later
-         (helm-candidates (-map 'build-helm-candidate git-output-lines))
+         (helm-candidates (-map 'recent-branches/build-helm-candidate git-output-lines))
          ;; do the helm thing and get the result
          (helm-selection (helm :sources
                                (helm-build-sync-source "recent branches"

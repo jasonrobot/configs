@@ -13,6 +13,7 @@
 (load "~/.emacs.d/functions.el")
 (load "~/.emacs.d/fish-colors.el")
 (load "~/.emacs.d/helm-magit-recent-branches.el")
+(load "~/.emacs.d/helm-perspective-switch.el")
 
 ;;;;;;;;;;;;;;
 ;; Packages ;;
@@ -198,7 +199,10 @@
   (advice-add 'vc-git-mode-line-string
             :filter-return
             (lambda (ret)
-              (s-replace-regexp ".*\\(PORT-[0-9]\\{4,5\\}\\).*" "\\1" ret))))
+              (s-replace-regexp ".*\\(PORT-[0-9]\\{4,5\\}\\).*" "\\1" ret)))
+  (advice-add 'magit-worktree-branch   :after  #'my-magit-worktree-create-perspective)
+  (advice-add 'magit-worktree-checkout :after  #'my-magit-worktree-create-perspective)
+  (advice-add 'magit-worktree-delete   :before #'my-magit-worktree-kill-perspective))
 
 ;; (use-package ng2-mode)
 
@@ -218,7 +222,8 @@ the frame global perspective."
 
 (use-package perspective
   :bind
-  ("C-x C-b" . persp-list-buffers)         ; or use a nicer switcher, see below
+  (("C-x C-b" . persp-list-buffers)         ; or use a nicer switcher, see below
+   (:map perspective-map ("s" . helm-perspective-swtich)))
   :custom
   (persp-mode-prefix-key (kbd "C-c M-p"))  ; pick your own prefix key here
   :init

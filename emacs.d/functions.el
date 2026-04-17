@@ -269,5 +269,28 @@ always sets branch.NAME.remote to origin. START-POINT is ignored."
      start
      end)))
 
+(defun my-find-magit-buffer-by-branch (branch)
+  "Find a magit buffer for a branch named BRANCH.  Return NIL if not found."
+  (-first (lambda (buffer)
+             (let ((name (buffer-name buffer)))
+               (and
+                (s-contains? "magit:" name)
+                (s-contains? branch name))))
+           (buffer-list)))
+
+(defun my-magit-worktree-create-perspective (directory branch &rest _)
+  "After creating a worktree at DIRECTORY, switch to a perspective named BRANCH."
+  (persp-switch branch)
+  (let ((magit-buf (my-find-magit-buffer-by-branch branch)))
+    (when magit-buf (persp-set-buffer magit-buf))))
+
+(defun my-magit-worktree-kill-perspective (worktree)
+  "Before deleting WORKTREE, kill the perspective matching its branch."
+  (when-let* ((wt (seq-find (lambda (w) (equal (car w) worktree))
+                             (magit-list-worktrees)))
+              (branch (nth 2 wt)))
+    (when (member branch (persp-names))
+      (persp-kill branch))))
+
 (provide 'functions)
 ;;; functions.el ends here
