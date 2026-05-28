@@ -99,20 +99,6 @@ This is used to override \"magit-branch-maybe-adjust-upstream\", and it just
 always sets branch.NAME.remote to origin. START-POINT is ignored."
     (magit-call-git "branch" "--set-upstream-to=origin" branch))
 
-(defun setup-tide-mode ()
-  "Used as a hook for typescript mode to enable tide mode with all the nice extras."
-  (interactive)
-  (message "setting up tide mode")
-  (tide-setup)
-  (flycheck-mode +1)
-  ;; (setq flycheck-check-syntax-automatically '(save mode-enabled))
-  (eldoc-mode +1)
-  (tide-hl-identifier-mode +1)
-  ;; company is an optional dependency. You have to
-  ;; install it separately via package-install
-  ;; `M-x package-install [ret] company`
-  (company-mode +1))
-
 (defun ask-before-closing ()
   "Get confirmation before closing Emacs."
   (interactive)

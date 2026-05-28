@@ -7,13 +7,6 @@
 
 ;;; Code:
 
-(defvar helm-source-perspective-not-found
-  (helm-build-dummy-source
-   "Create perspective"
-   :action (helm-make-actions
-            "Create perspective"
-            #'persp-switch)))
-
 (defun helm-perspective-swtich ()
   "Get perspectives and switch between them."
   (interactive)
@@ -21,8 +14,14 @@
          (helm-source-perspective-list (helm-build-sync-source "perspectives"
                                          :candidates helm-candidates
                                          :fuzzy-match nil))
-         (helm-selection (helm :sources '(helm-source-perspective-list
-                                          helm-source-perspective-not-found)
+         (helm-source-perspective-not-found (helm-build-sync-source "Create perspective"
+                                              :candidates (lambda () (list helm-pattern))
+                                              :volatile t
+                                              :action (helm-make-actions
+                                                       "Create perspective"
+                                                       #'persp-switch)))
+         (helm-selection (helm :sources `(,helm-source-perspective-list
+                                          ,helm-source-perspective-not-found)
                                :buffer "*perspectives*")))
     (when helm-selection
       (persp-switch helm-selection))))

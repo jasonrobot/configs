@@ -6,6 +6,8 @@
 ;; do this, since I usually run fish
 (setq shell-file-name "/bin/bash")
 
+(add-to-list 'default-frame-alist '(fullscreen . maximized))
+
 ;;;;;;;;;;;;;;;;
 ;; Load files ;;
 ;;;;;;;;;;;;;;;;
@@ -21,10 +23,6 @@
 
 (require 'package)
 
-;; (add-to-list 'package-archives
-;;              '("mepla" . "http://melpa.milkbox.net/packages/")
-;;              t)
-
 ;;temp fix till elpa stops being weird
 (setq package-archives
       '(("gnu" . "http://elpa.gnu.org/packages/")
@@ -34,6 +32,11 @@
 
 (unless (package-installed-p 'use-package)
   (package-install 'use-package))
+
+(use-package agent-shell
+  :config
+  (setq agent-shell-anthropic-authentication
+      (agent-shell-anthropic-make-authentication :login t)))
 
 (use-package avy
   :ensure t
@@ -62,39 +65,12 @@
          ("M-y" . helm-show-kill-ring)
          ("C-h o" . helm-apropos)))
 
-(defun -strip-newlines-from-json (args) ;(output checker buffer)
-  "Remove newlines from the first element of ARGS."
-  (cons (replace-regexp-in-string "\n" "" (car args))
-        (cdr args)))
-
-(defun -strip-warning-message-from-tslint (args) ;(output checker buffer)
-  "Remove a tslint error from ARGS that causes them to be invalid JSON."
-  (cons (replace-regexp-in-string "=\\{13\\}\n\\(.*\n\\)*=\\{13\\}\n"
-                                  ""
-                                  (car args))
-        (cdr args)))
-
 (use-package eldoc
   :delight)
 
 (use-package fish-mode
   :ensure t)
 
-(use-package flycheck
-  :ensure t
-  :init
-  (global-flycheck-mode)
-  :config
-  (setq-default flycheck-disabled-checkers
-                (append flycheck-disabled-checkers
-                        '(javascript-jshint)))
-  (flycheck-add-mode 'javascript-eslint 'js2-mode)
-  (advice-add 'flycheck-parse-eslint
-              :filter-args
-              #'-strip-newlines-from-json)
-  (advice-add 'flycheck-parse-eslint
-              :filter-args
-              #'-strip-warning-message-from-tslint))
 
 (use-package anzu
   :ensure t
@@ -171,7 +147,6 @@
   :ensure t
   :mode "\\.m?js\\'"
   :delight "JS²"
-  ;; :bind (("C-." . js2-next-error))
   :config
   (setq js2-global-externs
         '("setTimeout" "setInterval" "clearTimeout" "clearInterval"
@@ -211,6 +186,7 @@ the frame global perspective."
                    (remove global-scratch-buffer global-buffers))))))))
 
 (use-package perspective
+  :ensure t
   :bind
   (("C-x C-b" . persp-list-buffers)         ; or use a nicer switcher, see below
    (:map perspective-map ("s" . helm-perspective-swtich)))
@@ -252,35 +228,28 @@ the frame global perspective."
 ;;   :config
 ;;   (setq inferior-lisp-program "sbcl"))
 
-(use-package tide
-  :ensure t
-  :after (company flycheck)
-  :hook (
-         ;; (typescript-ts-mode . tide-setup)
-         ;; (tsx-ts-mode . tide-setup)
-         ;; (typescript-mode . tide-setup)
-         (typescript-ts-mode . tide-hl-identifier-mode)
-         (before-save . tide-format-before-save)
-         ))
 
-  ;; :init
-  ;; (add-hook 'before-save-hook 'tide-format-before-save)
-  ;; (add-hook 'typescript-ts-mode-hook #'setup-tide-mode)
-  ;; :config
-  ;; (setq tide-format-options '(:indentSize 2)))
+;; Workaround: tree-sitter 0.26 is incompatible with Emacs 30.2 #match predicate.
+;; Must be set before any treesit mode activates. Remove when Arch backports the fix.
+(setq treesit-font-lock-level 2)
 
-  ;; :config
-  ;; (advice-add 'tide-format
-  ;;             :override
-  ;;             (lambda () nil))) ;TODO use eslint to format this.
+(setq treesit-language-source-alist
+      '((typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
+        (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")))
+
+;; (use-package flymake-eslint
+;;   :ensure t)
 
 (use-package typescript-ts-mode
   :mode "\\.ts\\'"
-  ;; :hook (tide-mode setup-tide-mode))
-  :init
-  (add-hook 'typescript-ts-mode-hook #'setup-tide-mode)
-  ;; (add-hook 'typescript-ts-mode-hook 'eglot-ensure)
-  )
+  :hook (typescript-ts-mode . eglot-ensure)
+  ;; :hook (typescript-ts-mode . flymake-eslint-enable)
+  :config
+  (add-hook 'before-save-hook
+            (lambda ()
+              (when (eq major-mode 'typescript-ts-mode)
+                (eglot-format-buffer)))
+            nil t))
 
 (use-package web-mode
   :ensure t
@@ -420,7 +389,7 @@ the frame global perspective."
 (setq mouse-wheel-progressive-speed nil)
 (setq inhibit-startup-screen t)
 ;; (add-to-list 'default-frame-alist '(font . "Roboto Mono 10"))
-(add-to-list 'default-frame-alist '(font . "JetBrains Mono 13"))
+(add-to-list 'default-frame-alist '(font . "JetBrains Mono 10"))
 
 (setq custom-file "~/.emacs.d/custom.el")
 (load custom-file)
