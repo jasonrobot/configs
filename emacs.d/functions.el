@@ -198,19 +198,23 @@ always sets branch.NAME.remote to origin. START-POINT is ignored."
   (let ((filename (buffer-file-name)))
     (save-match-data
       (let ((component-regexp (rx (group (1+ (in alnum "-")))
-                                  "."
-                                  (group (or "component" "service"))
+                                  (repeat 0 1
+                                   "."
+                                   (group (or "component" "service" "store" "feature")))
                                   "."
                                   (group (1+ word)))))
         (if (string-match component-regexp filename)
-            (let ((component-name (match-string 1 filename))
-                  (component-or-service (match-string 2 filename))
-                  (component-suffix (match-string 3 filename)))
-              (if (and (string-equal component-or-service "service")
-                       (or (string-equal suffix "html") (string-equal suffix "scss")))
-                  (message (format "Cannot open for %s service" suffix))
-                (find-file (concat component-name "." component-or-service "." suffix))))
-          (message "Not an angular component"))))))
+            (let* ((component-name (match-string 1 filename))
+                   (component-or-service (match-string 2 filename))
+                   (component-suffix (match-string 3 filename))
+                   (expected-file-name (if component-or-service
+                                           (concat component-name "." component-or-service "." suffix)
+                                         (concat component-name "." suffix))))
+              (if (file-exists-p expected-file-name)
+                  (find-file expected-file-name)
+                (if (y-or-n-p (format "File %s does not exist. Create it?" expected-file-name))
+                    (find-file expected-file-name))))
+          (message "Not in an angular component."))))))
 
 (defun my-angular-open-template ()
   "Open the html template for the current component."
@@ -268,7 +272,7 @@ always sets branch.NAME.remote to origin. START-POINT is ignored."
   "After creating a worktree at DIRECTORY, switch to a perspective named BRANCH."
   (persp-switch branch)
   (let ((magit-buf (my-find-magit-buffer-by-branch branch)))
-    (when magit-buf (persp-set-buffer magit-buf))))
+    (when magit-buf (persp-add-buffer magit-buf))))
 
 (defun my-magit-worktree-kill-perspective (worktree)
   "Before deleting WORKTREE, kill the perspective matching its branch."

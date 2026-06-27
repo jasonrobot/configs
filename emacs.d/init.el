@@ -143,14 +143,6 @@
 ;;   :ensure t
 ;;   :delight highlight-indent-guides-mode)
 
-(use-package js2-mode
-  :ensure t
-  :mode "\\.m?js\\'"
-  :delight "JS²"
-  :config
-  (setq js2-global-externs
-        '("setTimeout" "setInterval" "clearTimeout" "clearInterval"
-          "describe" "it" "beforeEach" "afterEach" "beforeAll" "afterAll" "expect" "jasmine")))
 
 (use-package magit
   :ensure t
@@ -171,6 +163,8 @@
   (advice-add 'magit-worktree-checkout :after  #'my-magit-worktree-create-perspective)
   (advice-add 'magit-worktree-delete   :before #'my-magit-worktree-kill-perspective))
 
+;; (use-package ng2-mode)
+
 (defun my/fast-persp-current-buffers* (&optional include-global)
   "Same as `persp-current-buffers' but if INCLUDE-GLOBAL include buffers from
 the frame global perspective."
@@ -185,19 +179,17 @@ the frame global perspective."
                      global-buffers
                    (remove global-scratch-buffer global-buffers))))))))
 
-(use-package perspective
+(use-package persp-mode
   :ensure t
   :bind
-  (("C-x C-b" . persp-list-buffers)         ; or use a nicer switcher, see below
-   (:map perspective-map ("s" . helm-perspective-swtich)))
+  (("C-x C-b" . (lambda (arg)
+                  (interactive "P")
+                  (with-persp-buffer-list () (ibuffer arg))))
+   (:map persp-key-map ("s" . helm-perspective-swtich)))
   :custom
-  (persp-mode-prefix-key (kbd "C-c M-p"))  ; pick your own prefix key here
+  (persp-keymap-prefix (kbd "C-c M-p"))
   :init
-  (persp-mode)
-  :config
-  (advice-add 'persp-current-buffers*
-              :override
-              #'my/fast-persp-current-buffers*))
+  (persp-mode 1))
 
 (use-package projectile
   :ensure t

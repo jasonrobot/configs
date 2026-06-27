@@ -10,7 +10,7 @@
 (defun helm-perspective-swtich ()
   "Get perspectives and switch between them."
   (interactive)
-  (let* ((helm-candidates (persp-all-names))
+  (let* ((helm-candidates (persp-names))
          (helm-source-perspective-list (helm-build-sync-source "perspectives"
                                          :candidates helm-candidates
                                          :fuzzy-match nil))
